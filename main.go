@@ -16,7 +16,7 @@ import (
 
 // TreeFile is a representation of a file or folder in the filesystem
 type TreeFile struct {
-	Name     string
+	Path     string
 	Type     string
 	Mode     string
 	Size     int64
@@ -31,7 +31,7 @@ func walkFileSystem(currentPath string, info os.FileInfo, ignore []string) (Tree
 	}
 	if !info.IsDir() {
 		return TreeFile{
-			Name:    info.Name(),
+			Path:    currentPath,
 			Type:    "file",
 			Mode:    info.Mode().String(),
 			Modtime: info.ModTime().String(),
@@ -43,7 +43,7 @@ func walkFileSystem(currentPath string, info os.FileInfo, ignore []string) (Tree
 			panic(error)
 		}
 		directoryTree := TreeFile{
-			Name:    currentDirectory.Name(),
+			Path:    currentPath,
 			Type:    "directory",
 			Mode:    info.Mode().String(),
 			Modtime: info.ModTime().String(),
@@ -79,7 +79,7 @@ func walkFileGodirWalk(currentPath string, info os.FileInfo, ignore []string) (T
 	}
 	if !info.IsDir() {
 		return TreeFile{
-			Name:    info.Name(),
+			Path:    currentPath,
 			Type:    "file",
 			Mode:    info.Mode().String(),
 			Modtime: info.ModTime().String(),
@@ -91,7 +91,7 @@ func walkFileGodirWalk(currentPath string, info os.FileInfo, ignore []string) (T
 			panic(err)
 		}
 		directoryTree := TreeFile{
-			Name:    currentDirectory.Name(),
+			Path:    currentPath,
 			Type:    "directory",
 			Mode:    info.Mode().String(),
 			Modtime: info.ModTime().String(),
@@ -101,13 +101,13 @@ func walkFileGodirWalk(currentPath string, info os.FileInfo, ignore []string) (T
 		defer currentDirectory.Close()
 
 		errWalk := godirwalk.Walk(currentPath, &godirwalk.Options{
-			Callback: func(osPathname string, info *godirwalk.Dirent) error {
+			Callback: func(itemPath string, info *godirwalk.Dirent) error {
 				fileType := "file"
 				if info.IsDir() {
 					fileType = "directory"
 				}
 				child := TreeFile{
-					Name:    info.Name(),
+					Path:    itemPath,
 					Type:    fileType,
 					Mode:    info.ModeType().String(),
 					Modtime: "",
@@ -135,7 +135,7 @@ func walkFileCwalk(currentPath string, info os.FileInfo, ignore []string) (TreeF
 	}
 	if !info.IsDir() {
 		return TreeFile{
-			Name:    info.Name(),
+			Path:    currentPath,
 			Type:    "file",
 			Mode:    info.Mode().String(),
 			Modtime: info.ModTime().String(),
@@ -147,7 +147,7 @@ func walkFileCwalk(currentPath string, info os.FileInfo, ignore []string) (TreeF
 			panic(err)
 		}
 		directoryTree := TreeFile{
-			Name:    currentDirectory.Name(),
+			Path:    currentPath,
 			Type:    "directory",
 			Mode:    info.Mode().String(),
 			Modtime: info.ModTime().String(),
@@ -165,7 +165,7 @@ func walkFileCwalk(currentPath string, info os.FileInfo, ignore []string) (TreeF
 				fileType = "directory"
 			}
 			child := TreeFile{
-				Name:    info.Name(),
+				Path:    itemPath,
 				Type:    fileType,
 				Mode:    info.Mode().String(),
 				Modtime: info.ModTime().String(),
@@ -200,6 +200,8 @@ func execution(systemPath string, algorithm string, ignore []string) {
 		tree, err = walkFileCwalk(systemPath, fileInfo, ignore)
 		break
 	case "system":
+		tree, err = walkFileSystem(systemPath, fileInfo, ignore)
+		break
 	default:
 		tree, err = walkFileSystem(systemPath, fileInfo, ignore)
 		break
@@ -218,7 +220,7 @@ func execution(systemPath string, algorithm string, ignore []string) {
 
 func main() {
 	start := time.Now()
-	systemPath := "/Users/adriangheorghe/Projects/www/emmaline"
+	systemPath := "/Users/adriangheorghe/Projects/www/downloadjapan-dev"
 	ignore := []string{ /*".git", ".idea", ".vscode", "pkg", "src"*/ }
 	execution(systemPath, "system", ignore)
 	elapsed := time.Since(start)
