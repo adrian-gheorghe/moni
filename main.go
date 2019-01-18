@@ -8,8 +8,10 @@ import (
 	"log"
 	"os"
 	"path"
-	"runtime"
 	"time"
+
+	"github.com/iafan/cwalk"
+	"github.com/karrick/godirwalk"
 )
 
 // TreeFile is a representation of a file or folder in the filesystem
@@ -22,16 +24,7 @@ type TreeFile struct {
 	Children []TreeFile
 }
 
-func stringInSlice(a string, list []string) bool {
-	for _, b := range list {
-		if b == a {
-			return true
-		}
-	}
-	return false
-}
-
-func walkFileSystemTree(currentPath string, info os.FileInfo, ignore []string) (TreeFile, error) {
+func walkFileSystem(currentPath string, info os.FileInfo, ignore []string) (TreeFile, error) {
 	PrintMemUsage()
 	if stringInSlice(info.Name(), ignore) {
 		return TreeFile{}, errors.New("Ignoring path " + info.Name())
@@ -67,7 +60,7 @@ func walkFileSystemTree(currentPath string, info os.FileInfo, ignore []string) (
 			if fi.Name() == "." || fi.Name() == ".." {
 				continue
 			}
-			child, error := walkFileSystemTree(path.Join(currentPath, fi.Name()), fi, ignore)
+			child, error := walkFileSystem(path.Join(currentPath, fi.Name()), fi, ignore)
 			if error != nil {
 				fmt.Println(error)
 			} else {
@@ -78,50 +71,142 @@ func walkFileSystemTree(currentPath string, info os.FileInfo, ignore []string) (
 	}
 }
 
-func bToMb(b uint64) uint64 {
-	return b / 1024 / 1024
+func walkFileGodirWalk(currentPath string, info os.FileInfo, ignore []string) (TreeFile, error) {
+	PrintMemUsage()
+
+	if stringInSlice(info.Name(), ignore) {
+		return TreeFile{}, errors.New("Ignoring path " + info.Name())
+	}
+	if !info.IsDir() {
+		return TreeFile{
+			Name:    info.Name(),
+			Type:    "file",
+			Mode:    info.Mode().String(),
+			Modtime: info.ModTime().String(),
+			Size:    info.Size(),
+		}, nil
+	} else {
+		currentDirectory, err := os.Open(currentPath)
+		if err != nil {
+			panic(err)
+		}
+		directoryTree := TreeFile{
+			Name:    currentDirectory.Name(),
+			Type:    "directory",
+			Mode:    info.Mode().String(),
+			Modtime: info.ModTime().String(),
+			Size:    info.Size(),
+		}
+
+		defer currentDirectory.Close()
+
+		errWalk := godirwalk.Walk(currentPath, &godirwalk.Options{
+			Callback: func(osPathname string, info *godirwalk.Dirent) error {
+				fileType := "file"
+				if info.IsDir() {
+					fileType = "directory"
+				}
+				child := TreeFile{
+					Name:    info.Name(),
+					Type:    fileType,
+					Mode:    info.ModeType().String(),
+					Modtime: "",
+					Size:    0,
+				}
+				directoryTree.Children = append(directoryTree.Children, child)
+
+				return nil
+			},
+			Unsorted: false, // (optional) set true for faster yet non-deterministic enumeration (see godoc)
+		})
+		if errWalk != nil {
+			panic(errWalk)
+		}
+
+		return directoryTree, nil
+	}
 }
 
-func PrintMemUsage() {
-	var m runtime.MemStats
-	var filename = "memory.log"
-	memoryFile, error := os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
-	if error != nil {
-		panic(error)
-	}
+func walkFileCwalk(currentPath string, info os.FileInfo, ignore []string) (TreeFile, error) {
+	PrintMemUsage()
 
-	runtime.ReadMemStats(&m)
-	if _, error := memoryFile.Write([]byte(fmt.Sprintf("Alloc = %v MiB", bToMb(m.Alloc)))); error != nil {
-		log.Fatal(error)
+	if stringInSlice(info.Name(), ignore) {
+		return TreeFile{}, errors.New("Ignoring path " + info.Name())
 	}
+	if !info.IsDir() {
+		return TreeFile{
+			Name:    info.Name(),
+			Type:    "file",
+			Mode:    info.Mode().String(),
+			Modtime: info.ModTime().String(),
+			Size:    info.Size(),
+		}, nil
+	} else {
+		currentDirectory, err := os.Open(currentPath)
+		if err != nil {
+			panic(err)
+		}
+		directoryTree := TreeFile{
+			Name:    currentDirectory.Name(),
+			Type:    "directory",
+			Mode:    info.Mode().String(),
+			Modtime: info.ModTime().String(),
+			Size:    info.Size(),
+		}
 
-	if _, error := memoryFile.Write([]byte(fmt.Sprintf("\tTotalAlloc = %v MiB", bToMb(m.TotalAlloc)))); error != nil {
-		log.Fatal(error)
-	}
+		defer currentDirectory.Close()
 
-	if _, error := memoryFile.Write([]byte(fmt.Sprintf("\tSys = %v MiB", bToMb(m.Sys)))); error != nil {
-		log.Fatal(error)
-	}
+		errWalk := cwalk.Walk(currentPath, func(itemPath string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			fileType := "file"
+			if info.IsDir() {
+				fileType = "directory"
+			}
+			child := TreeFile{
+				Name:    info.Name(),
+				Type:    fileType,
+				Mode:    info.Mode().String(),
+				Modtime: info.ModTime().String(),
+				Size:    info.Size(),
+			}
+			directoryTree.Children = append(directoryTree.Children, child)
 
-	if _, error := memoryFile.Write([]byte(fmt.Sprintf("\tNumGC = %v\n", m.NumGC))); error != nil {
-		log.Fatal(error)
-	}
-	if error := memoryFile.Close(); error != nil {
-		log.Fatal(error)
+			return nil
+		})
+		if errWalk != nil {
+			panic(errWalk)
+		}
+
+		return directoryTree, nil
 	}
 }
 
-func execution(systemPath string) {
+func execution(systemPath string, algorithm string, ignore []string) {
 	PrintMemUsage()
 	log.SetFlags(log.Lshortfile)
-	ignore := []string{ /*".git", ".idea", ".vscode", "pkg", "src"*/ }
+
 	fileInfo, err := os.Lstat(systemPath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	tree, error := walkFileSystemTree(systemPath, fileInfo, ignore)
-	if error != nil {
-		fmt.Println(error)
+	tree := TreeFile{}
+	switch algorithm {
+	case "godirwalk":
+		tree, err = walkFileGodirWalk(systemPath, fileInfo, ignore)
+		break
+	case "cwalk":
+		tree, err = walkFileCwalk(systemPath, fileInfo, ignore)
+		break
+	case "system":
+	default:
+		tree, err = walkFileSystem(systemPath, fileInfo, ignore)
+		break
+	}
+
+	if err != nil {
+		fmt.Println(err)
 	}
 	PrintMemUsage()
 	treeJSON, _ := json.MarshalIndent(tree, "", "    ")
@@ -130,11 +215,12 @@ func execution(systemPath string) {
 	PrintMemUsage()
 	fmt.Println("done")
 }
+
 func main() {
 	start := time.Now()
-	systemPath := "/Users/adriangheorghe/go"
-	execution(systemPath)
+	systemPath := "/Users/adriangheorghe/Projects/www/emmaline"
+	ignore := []string{ /*".git", ".idea", ".vscode", "pkg", "src"*/ }
+	execution(systemPath, "system", ignore)
 	elapsed := time.Since(start)
 	log.Printf("Execution %s", elapsed)
-
 }
