@@ -160,6 +160,10 @@ func walkFileCwalk(currentPath string, info os.FileInfo, ignore []string) (TreeF
 			if err != nil {
 				return err
 			}
+			if stringInSlice(info.Name(), ignore) {
+				return nil
+			}
+
 			fileType := "file"
 			if info.IsDir() {
 				fileType = "directory"
@@ -220,9 +224,9 @@ func execution(systemPath string, algorithm string, ignore []string) {
 
 func main() {
 	start := time.Now()
-	systemPath := "/Users/adriangheorghe/Projects/www/downloadjapan-dev"
-	ignore := []string{ /*".git", ".idea", ".vscode", "pkg", "src"*/ }
-	execution(systemPath, "system", ignore)
+	systemPath := "/Users/adriangheorghe/Projects/targetpractice/targetpractice-api"
+	ignore := []string{".git", ".idea", ".vscode", ".DS_Store"}
+	execution(systemPath, "godirwalk", ignore)
 	elapsed := time.Since(start)
 	log.Printf("Execution %s", elapsed)
 }
