@@ -1,0 +1,63 @@
+version: 2
+   
+jobs:
+  test:
+    docker:
+      - image: circleci/golang:1.11
+    steps:
+      - checkout
+      - run: go test -v ./...  
+  build:
+    docker:
+      - image: circleci/golang:1.11
+    steps:
+      - checkout
+      - run:
+          command: |
+            mkdir -p ./artefacts
+            cp VERSION ./artefacts/VERSION
+            CGO_ENABLED=0 GOOS=linux go build -o ./artefacts/hacked-linux
+            CGO_ENABLED=0 GOOS=darwin go build -o ./artefacts/hacked-darwin
+            CGO_ENABLED=0 GOOS=windows go build -o ./artefacts/hacked-windows
+            CGO_ENABLED=0 go build -o ./artefacts/hacked
+            ls -al ./artefacts
+      - persist_to_workspace:
+          root: artefacts
+          paths:
+            - hacked-linux
+            - hacked-darwin
+            - hacked-windows
+            - hacked
+            - VERSION
+  release:
+    docker:
+      # specify the version
+      - image: cibuilds/github:0.10
+    steps:
+      - attach_workspace:
+          # Must be absolute path or relative path from working_directory
+          at: ./artefacts
+      - run:
+          command: |
+            ls -al ./artefacts
+            VERSION=$(cat ./artefacts/VERSION)
+            echo $VERSION
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} ./artefacts/
+workflows:
+  version: 2
+  test_and_build_and_release:
+    jobs:
+      - test
+      - build:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
+      - release:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+              
