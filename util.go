@@ -7,6 +7,14 @@ import (
 	"runtime"
 )
 
+// LogWriter represents the implementation of the log writer
+type LogWriter struct {
+}
+
+func (writer LogWriter) Write(bytes []byte) (int, error) {
+	return fmt.Print(string(bytes))
+}
+
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
