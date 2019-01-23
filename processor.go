@@ -20,12 +20,17 @@ type Processor interface {
 type ProcessorExecuter struct {
 	SystemPath string
 	Ignore     []string
-	Walker     TreeWalkType
+	Walker     *TreeWalkType
 }
 
 // SetWalker is the setter for the walker object
-func (processor *ProcessorExecuter) SetWalker(walker TreeWalkType) {
+func (processor *ProcessorExecuter) SetWalker(walker *TreeWalkType) {
 	processor.Walker = walker
+}
+
+// GetWalker is the setter for the walker object
+func (processor *ProcessorExecuter) GetWalker() (walker *TreeWalkType) {
+	return processor.Walker
 }
 
 // Execute is the implementation of the actual processing method.
@@ -49,7 +54,7 @@ func (processor *ProcessorExecuter) Execute() {
 // ProcessTree is the implementation of the tree process method
 func (processor *ProcessorExecuter) ProcessTree() (TreeFile, error) {
 	tree := TreeFile{}
-	tree, err := processor.Walker.ParseTree(processor.SystemPath, processor.Ignore)
+	tree, err := processor.GetWalker().ParseTree(processor.SystemPath, processor.Ignore)
 
 	if err != nil {
 		log.Println(err)

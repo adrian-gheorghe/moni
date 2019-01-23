@@ -19,7 +19,7 @@ func main() {
 	ignore := []string{".git", ".idea", ".vscode", ".DS_Store"}
 	walker := TreeWalk{}
 
-	processor := ProcessorExecuter{systemPath, ignore, walker}
+	processor := ProcessorExecuter{systemPath, ignore, *walker}
 	processor.Execute()
 
 	elapsed := time.Since(start)
