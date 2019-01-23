@@ -15,13 +15,14 @@ func main() {
 	log.SetFlags(0)
 	log.SetOutput(new(LogWriter))
 
-	systemPath := "/Users/adriangheorghe/Projects/targetpractice/targetpractice-api"
+	systemPath := "./testdata"
 	ignore := []string{".git", ".idea", ".vscode", ".DS_Store"}
 	walker := TreeWalk{}
 
-	processor := ProcessorExecuter{systemPath, ignore, *walker}
+	processor := ProcessorExecuter{systemPath, ignore, &walker}
 	processor.Execute()
 
+	log.Println(processor)
 	elapsed := time.Since(start)
 	log.Printf("Execution %s", elapsed)
 }

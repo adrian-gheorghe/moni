@@ -1,5 +1,10 @@
 package main
 
+import (
+	"log"
+	"os"
+)
+
 // TreeFile is a representation of a file or folder in the filesystem
 type TreeFile struct {
 	Path     string
@@ -21,8 +26,12 @@ type TreeWalk struct {
 
 // ParseTree is the main entry point implementation of the tree traversal
 func (walker *TreeWalk) ParseTree(systemPath string, ignore []string) (TreeFile, error) {
+	info, err := os.Lstat(systemPath)
+	if err != nil {
+		log.Fatal(err)
+	}
 	tree := TreeFile{
-		Path:    currentPath,
+		Path:    systemPath,
 		Type:    "file",
 		Mode:    info.Mode().String(),
 		Modtime: info.ModTime().String(),
