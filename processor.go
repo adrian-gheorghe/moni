@@ -22,16 +22,6 @@ type ProcessorExecuter struct {
 	Walker     TreeWalkType
 }
 
-// SetWalker is the setter for the walker object
-func (processor *ProcessorExecuter) SetWalker(walker TreeWalkType) {
-	processor.Walker = walker
-}
-
-// GetWalker is the setter for the walker object
-func (processor *ProcessorExecuter) GetWalker() (walker TreeWalkType) {
-	return processor.Walker
-}
-
 // Execute is the implementation of the actual processing method.
 func (processor *ProcessorExecuter) Execute() {
 	PrintMemUsage()
@@ -43,14 +33,13 @@ func (processor *ProcessorExecuter) Execute() {
 	}
 	treeJSON, _ := processor.ProcessTreeObject(tree)
 	PrintMemUsage()
-	err = ioutil.WriteFile("output.json", treeJSON, 0644)
-	PrintMemUsage()
+	processor.WriteOutput(treeJSON)
 }
 
 // ProcessTree is the implementation of the tree process method
 func (processor *ProcessorExecuter) ProcessTree() (TreeFile, error) {
 	tree := TreeFile{}
-	tree, err := processor.GetWalker().ParseTree(processor.SystemPath, processor.Ignore)
+	tree, err := processor.Walker.ParseTree()
 
 	if err != nil {
 		log.Println(err)
@@ -66,5 +55,11 @@ func (processor *ProcessorExecuter) ProcessTreeObject(tree TreeFile) ([]byte, er
 
 // WriteOutput is the output log for the ProcessorExecuter
 func (processor *ProcessorExecuter) WriteOutput(treeJSON []byte) error {
+	PrintMemUsage()
 	return ioutil.WriteFile("output.json", treeJSON, 0644)
+}
+
+// NewProcessorExecuter is the constructor for ProcessorExecuter
+func NewProcessorExecuter(systemPath string, ignore []string, walker *TreeWalk) *ProcessorExecuter {
+	return &ProcessorExecuter{systemPath, ignore, walker}
 }

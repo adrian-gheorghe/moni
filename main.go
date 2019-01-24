@@ -17,12 +17,9 @@ func main() {
 
 	systemPath := "./testdata"
 	ignore := []string{".git", ".idea", ".vscode", ".DS_Store"}
-	walker := TreeWalk{}
-
-	processor := ProcessorExecuter{systemPath, ignore, &walker}
+	walker := NewTreeWalk(systemPath, ignore)
+	processor := NewProcessorExecuter(systemPath, ignore, walker)
 	processor.Execute()
-
-	log.Println(processor)
 	elapsed := time.Since(start)
 	log.Printf("Execution %s", elapsed)
 }
