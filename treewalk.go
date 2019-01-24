@@ -43,6 +43,9 @@ func (walker *TreeWalk) ParseTree() (TreeFile, error) {
 }
 
 // NewTreeWalk TreeWalk Constructor
-func NewTreeWalk(systemPath string, ignore []string) *TreeWalk {
-	return &TreeWalk{systemPath, ignore}
+func NewTreeWalk(walkType string, systemPath string, ignore []string) *TreeWalk {
+	treewalk := &new(walkType)
+	treewalk.systemPath = systemPath
+	treewalk.ignore = ignore
+	return treeWalk
 }
