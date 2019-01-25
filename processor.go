@@ -26,8 +26,8 @@ type ProcessorExecuter struct {
 func (processor *ProcessorExecuter) Execute() {
 	PrintMemUsage()
 	log.SetFlags(log.Lshortfile)
-	tree, err := processor.ProcessTree()
 
+	tree, err := processor.ProcessTree()
 	if err != nil {
 		log.Panic(err)
 	}

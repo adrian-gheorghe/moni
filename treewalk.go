@@ -1,8 +1,11 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"os"
+	"path"
 )
 
 // TreeFile is a representation of a file or folder in the filesystem
@@ -26,26 +29,67 @@ type TreeWalk struct {
 	ignore     []string
 }
 
+// NewTreeWalk TreeWalk Constructor
+func NewTreeWalk(walkType string, systemPath string, ignore []string) *TreeWalk {
+	if walkType == "CWalk" {
+		return &TreeWalk{systemPath, ignore}
+	} else if walkType == "GoDirWalk" {
+		return &TreeWalk{systemPath, ignore}
+	} else if walkType == "TreeWalk" {
+		return &TreeWalk{systemPath, ignore}
+	}
+	return &TreeWalk{systemPath, ignore}
+}
+
 // ParseTree is the main entry point implementation of the tree traversal
 func (walker *TreeWalk) ParseTree() (TreeFile, error) {
-	info, err := os.Lstat(walker.systemPath)
+	return walker.recursiveParseTree(walker.systemPath)
+}
+
+func (walker *TreeWalk) recursiveParseTree(currentPath string) (TreeFile, error) {
+	PrintMemUsage()
+	info, err := os.Lstat(currentPath)
 	if err != nil {
-		log.Fatal(err)
+		return TreeFile{}, err
 	}
-	tree := TreeFile{
-		Path:    walker.systemPath,
-		Type:    "file",
+	if stringInSlice(info.Name(), walker.ignore) {
+		return TreeFile{}, errors.New("Ignoring path " + info.Name())
+	}
+
+	fileType := "file"
+	if info.IsDir() {
+		fileType = "directory"
+	}
+	returnTree := TreeFile{
+		Path:    currentPath,
+		Type:    fileType,
 		Mode:    info.Mode().String(),
 		Modtime: info.ModTime().String(),
 		Size:    info.Size(),
 	}
-	return tree, nil
-}
+	if info.IsDir() {
+		currentDirectory, err := os.Open(currentPath)
+		if err != nil {
+			return TreeFile{}, err
+		}
+		defer currentDirectory.Close()
 
-// NewTreeWalk TreeWalk Constructor
-func NewTreeWalk(walkType string, systemPath string, ignore []string) *TreeWalk {
-	treewalk := &new(walkType)
-	treewalk.systemPath = systemPath
-	treewalk.ignore = ignore
-	return treeWalk
+		files, err := currentDirectory.Readdir(-1)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, fi := range files {
+			if fi.Name() == "." || fi.Name() == ".." {
+				continue
+			}
+
+			child, error := walker.recursiveParseTree(path.Join(currentPath, fi.Name()))
+			if error != nil {
+				fmt.Println(error)
+			} else {
+				returnTree.Children = append(returnTree.Children, child)
+			}
+		}
+	}
+	return returnTree, nil
 }

@@ -16,6 +16,7 @@ func main() {
 	log.SetOutput(new(LogWriter))
 
 	systemPath := "./testdata"
+	systemPath = "/Users/adriangheorghe/Downloads/public_html"
 	ignore := []string{".git", ".idea", ".vscode", ".DS_Store"}
 	walker := NewTreeWalk("TreeWalk", systemPath, ignore)
 	processor := NewProcessorExecuter(systemPath, ignore, walker)

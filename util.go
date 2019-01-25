@@ -31,7 +31,7 @@ func bToMb(b uint64) uint64 {
 // PrintMemUsage prints memory usage in files or logs
 func PrintMemUsage() {
 	var m runtime.MemStats
-	var filename = "memory.log"
+	var filename = "./memory.log"
 	memoryFile, error := os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
 	if error != nil {
 		panic(error)
