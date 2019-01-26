@@ -8,7 +8,7 @@ import (
 )
 
 func walkFileGodirWalk(currentPath string, info os.FileInfo, ignore []string) (TreeFile, error) {
-	PrintMemUsage()
+	//PrintMemUsage()
 
 	if stringInSlice(info.Name(), ignore) {
 		return TreeFile{}, errors.New("Ignoring path " + info.Name())

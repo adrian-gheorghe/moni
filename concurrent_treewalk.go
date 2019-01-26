@@ -12,6 +12,7 @@ import (
 type ConcurrentTreeWalk struct {
 	systemPath string
 	ignore     []string
+	writer     UsageWriter
 }
 
 // ParseTree is the main entry point implementation of the tree traversal
@@ -20,7 +21,7 @@ func (walker *ConcurrentTreeWalk) ParseTree() (TreeFile, error) {
 }
 
 func (walker *ConcurrentTreeWalk) recursiveParseTree(currentPath string) (TreeFile, error) {
-	PrintMemUsage()
+	walker.writer.PrintMemUsage()
 	info, err := os.Lstat(currentPath)
 	if err != nil {
 		return TreeFile{}, err

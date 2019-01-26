@@ -1,10 +1,10 @@
 general:
   interval: "1 hour"
-  tree_store: ./output.json
+  tree_store: ./output.yml
   path: ./testdata
 log:
-  memory_log: true
   memory_log_path: ./memory.log
+  memory_log: true
 algorithm:
   name: ConcurrentTreeWalk
   ignore:

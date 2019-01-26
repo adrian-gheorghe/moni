@@ -7,11 +7,6 @@ import (
 	"time"
 )
 
-// LogWriterInterface is the abstraction of the Log Writer
-type LogWriterInterface interface {
-	Write(bytes []byte) (int, error)
-}
-
 func main() {
 	start := time.Now()
 	log.SetFlags(0)
@@ -32,8 +27,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	walker := NewTreeWalk("ConcurentTreeWalk", configuration.General.Path, configuration.Algorithm.Ignore)
-	processor := NewProcessorExecuter(configuration.General.Path, configuration.Algorithm.Ignore, walker)
+	usageWriter := NewUsageWriter(configuration.Log.MemoryLog, configuration.Log.MemoryLogPath)
+	walker := NewTreeWalk("TreeWalk", configuration.General.Path, configuration.Algorithm.Ignore, *usageWriter)
+	processor := NewProcessorExecuter(configuration, walker, *usageWriter)
 	processor.Execute()
 	elapsed := time.Since(start)
 	log.Printf("Execution %s", elapsed)

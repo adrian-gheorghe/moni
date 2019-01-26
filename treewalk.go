@@ -10,12 +10,12 @@ import (
 
 // TreeFile is a representation of a file or folder in the filesystem
 type TreeFile struct {
-	Path     string
-	Type     string
-	Mode     string
-	Size     int64
-	Modtime  string
-	Children []TreeFile
+	Path     string     `yaml:"Path"`
+	Type     string     `yaml:"Type"`
+	Mode     string     `yaml:"Mode"`
+	Size     int64      `yaml:"Size"`
+	Modtime  string     `yaml:"Modtime"`
+	Children []TreeFile `yaml:"Children"`
 }
 
 // TreeWalkType is the abstraction of the walk object
@@ -27,20 +27,21 @@ type TreeWalkType interface {
 type TreeWalk struct {
 	systemPath string
 	ignore     []string
+	writer     UsageWriter
 }
 
 // NewTreeWalk TreeWalk Constructor
-func NewTreeWalk(walkType string, systemPath string, ignore []string) TreeWalkType {
+func NewTreeWalk(walkType string, systemPath string, ignore []string, writer UsageWriter) TreeWalkType {
 	if walkType == "CWalk" {
-		return &TreeWalk{systemPath, ignore}
+		return &TreeWalk{systemPath, ignore, writer}
 	} else if walkType == "GoDirWalk" {
-		return &TreeWalk{systemPath, ignore}
+		return &TreeWalk{systemPath, ignore, writer}
 	} else if walkType == "ConcurrentTreeWalk" {
-		return &ConcurrentTreeWalk{systemPath, ignore}
+		return &ConcurrentTreeWalk{systemPath, ignore, writer}
 	} else if walkType == "TreeWalk" {
-		return &TreeWalk{systemPath, ignore}
+		return &TreeWalk{systemPath, ignore, writer}
 	}
-	return &TreeWalk{systemPath, ignore}
+	return &TreeWalk{systemPath, ignore, writer}
 }
 
 // ParseTree is the main entry point implementation of the tree traversal
@@ -49,7 +50,7 @@ func (walker *TreeWalk) ParseTree() (TreeFile, error) {
 }
 
 func (walker *TreeWalk) recursiveParseTree(currentPath string) (TreeFile, error) {
-	PrintMemUsage()
+	walker.writer.PrintMemUsage()
 	info, err := os.Lstat(currentPath)
 	if err != nil {
 		return TreeFile{}, err

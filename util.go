@@ -7,6 +7,11 @@ import (
 	"runtime"
 )
 
+// LogWriterInterface is the abstraction of the Log Writer
+type LogWriterInterface interface {
+	Write(bytes []byte) (int, error)
+}
+
 // LogWriter represents the implementation of the log writer
 type LogWriter struct {
 }
@@ -28,10 +33,20 @@ func bToMb(b uint64) uint64 {
 	return b / 1024 / 1024
 }
 
-// PrintMemUsage prints memory usage in files or logs
-func PrintMemUsage() {
+// UsageWriter implements the memory writing process
+type UsageWriter struct {
+	logEnabled bool
+	logFile    string
+}
+
+// PrintMemUsage prings the os memory usage in logs of file
+func (usageWriter *UsageWriter) PrintMemUsage() {
+	if !usageWriter.logEnabled {
+		return
+	}
+
 	var m runtime.MemStats
-	var filename = "./memory.log"
+	var filename = usageWriter.logFile
 	memoryFile, error := os.OpenFile(filename, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
 	if error != nil {
 		panic(error)
@@ -56,4 +71,9 @@ func PrintMemUsage() {
 	if error := memoryFile.Close(); error != nil {
 		log.Fatal(error)
 	}
+}
+
+// NewUsageWriter is the constructor for the UsageWriter object
+func NewUsageWriter(logEnabled bool, logFile string) *UsageWriter {
+	return &UsageWriter{logEnabled, logFile}
 }

@@ -10,18 +10,18 @@ import (
 // Config is the representation of the stored config object
 type Config struct {
 	General struct {
-		Interval  string `json:"interval"`
-		TreeStore string `json:"tree_store"`
-		Path      string `json:"path"`
-	} `json:"general"`
+		Interval  string `yaml:"interval"`
+		TreeStore string `yaml:"tree_store"`
+		Path      string `yaml:"path"`
+	} `yaml:"general"`
 	Log struct {
-		MemoryLog     string `json:"memory_log"`
-		MemoryLogPath string `json:"memory_log_path"`
-	} `json:"log"`
+		MemoryLog     bool   `yaml:"memory_log"`
+		MemoryLogPath string `yaml:"memory_log_path"`
+	} `yaml:"log"`
 	Algorithm struct {
-		Name   string   `json:"name"`
-		Ignore []string `json:"ignore"`
-	} `json:"algorithm"`
+		Name   string   `yaml:"name"`
+		Ignore []string `yaml:"ignore"`
+	} `yaml:"algorithm"`
 }
 
 // ConfigProcessor is the abstraction of the configuration object
