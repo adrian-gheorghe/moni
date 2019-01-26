@@ -8,47 +8,18 @@ import (
 	"path"
 )
 
-// TreeFile is a representation of a file or folder in the filesystem
-type TreeFile struct {
-	Path     string
-	Type     string
-	Mode     string
-	Size     int64
-	Modtime  string
-	Children []TreeFile
-}
-
-// TreeWalkType is the abstraction of the walk object
-type TreeWalkType interface {
-	ParseTree() (TreeFile, error)
-}
-
-// TreeWalk is the object that walks through the file system directory given
-type TreeWalk struct {
+// ConcurrentTreeWalk is the object that walks through the file system directory given
+type ConcurrentTreeWalk struct {
 	systemPath string
 	ignore     []string
 }
 
-// NewTreeWalk TreeWalk Constructor
-func NewTreeWalk(walkType string, systemPath string, ignore []string) TreeWalkType {
-	if walkType == "CWalk" {
-		return &TreeWalk{systemPath, ignore}
-	} else if walkType == "GoDirWalk" {
-		return &TreeWalk{systemPath, ignore}
-	} else if walkType == "ConcurrentTreeWalk" {
-		return &ConcurrentTreeWalk{systemPath, ignore}
-	} else if walkType == "TreeWalk" {
-		return &TreeWalk{systemPath, ignore}
-	}
-	return &TreeWalk{systemPath, ignore}
-}
-
 // ParseTree is the main entry point implementation of the tree traversal
-func (walker *TreeWalk) ParseTree() (TreeFile, error) {
+func (walker *ConcurrentTreeWalk) ParseTree() (TreeFile, error) {
 	return walker.recursiveParseTree(walker.systemPath)
 }
 
-func (walker *TreeWalk) recursiveParseTree(currentPath string) (TreeFile, error) {
+func (walker *ConcurrentTreeWalk) recursiveParseTree(currentPath string) (TreeFile, error) {
 	PrintMemUsage()
 	info, err := os.Lstat(currentPath)
 	if err != nil {

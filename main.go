@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"log"
+	"os"
 	"time"
 )
 
@@ -15,11 +17,23 @@ func main() {
 	log.SetFlags(0)
 	log.SetOutput(new(LogWriter))
 
-	systemPath := "./testdata"
-	systemPath = "/Users/adriangheorghe/Downloads/public_html"
-	ignore := []string{".git", ".idea", ".vscode", ".DS_Store"}
-	walker := NewTreeWalk("TreeWalk", systemPath, ignore)
-	processor := NewProcessorExecuter(systemPath, ignore, walker)
+	var configPath = flag.String("config", "", "path for the configuration file")
+	flag.Parse()
+
+	if *configPath == "" {
+		log.Println("Configuration file has not been set up")
+		os.Exit(1)
+	}
+
+	configurationProcessor := NewConfigProcessorYml(*configPath)
+	configuration, err := configurationProcessor.load()
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+
+	walker := NewTreeWalk("ConcurentTreeWalk", configuration.General.Path, configuration.Algorithm.Ignore)
+	processor := NewProcessorExecuter(configuration.General.Path, configuration.Algorithm.Ignore, walker)
 	processor.Execute()
 	elapsed := time.Since(start)
 	log.Printf("Execution %s", elapsed)

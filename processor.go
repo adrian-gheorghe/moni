@@ -8,11 +8,16 @@ import (
 
 // Processor is the abstraction of the main execution of the program
 type Processor interface {
-	Execute(systemPath string, algorithm string, ignore []string)
-	ProcessTree(systemPath string, algorithm string, ignore []string) (TreeFile, error)
+	Execute()
+	ProcessTree() (TreeFile, error)
 	ProcessTreeObject(tree TreeFile) ([]byte, error)
-	WriteOutput(interface{}) error
-	SetWalker(TreeWalkType)
+	GetPreviousObjectTree() ([]byte, error)
+	WriteOutput([]byte) error
+}
+
+// NewProcessorExecuter is the constructor for ProcessorExecuter
+func NewProcessorExecuter(systemPath string, ignore []string, walker TreeWalkType) Processor {
+	return &ProcessorExecuter{systemPath, ignore, walker}
 }
 
 // ProcessorExecuter is the implementation of the Executer
@@ -53,13 +58,14 @@ func (processor *ProcessorExecuter) ProcessTreeObject(tree TreeFile) ([]byte, er
 	return treeProcessed, err
 }
 
+// GetPreviousObjectTree is the implementation of the tree compare method
+func (processor *ProcessorExecuter) GetPreviousObjectTree() ([]byte, error) {
+	var tree []byte
+	return tree, nil
+}
+
 // WriteOutput is the output log for the ProcessorExecuter
 func (processor *ProcessorExecuter) WriteOutput(treeJSON []byte) error {
 	PrintMemUsage()
 	return ioutil.WriteFile("output.json", treeJSON, 0644)
-}
-
-// NewProcessorExecuter is the constructor for ProcessorExecuter
-func NewProcessorExecuter(systemPath string, ignore []string, walker *TreeWalk) *ProcessorExecuter {
-	return &ProcessorExecuter{systemPath, ignore, walker}
 }
