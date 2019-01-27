@@ -16,7 +16,8 @@ func TestBToMb(t *testing.T) {
 }
 
 func TestPrintMemUsage(t *testing.T) {
-	PrintMemUsage()
+	usageWriter := NewUsageWriter(true, "./memory.log")
+	usageWriter.PrintMemUsage()
 	dat, _ := ioutil.ReadFile("./memory.log")
 	if string(dat) == "" {
 		t.Fatal("Failure")

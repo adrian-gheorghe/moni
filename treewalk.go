@@ -1,47 +1,20 @@
 package main
 
 import (
-	"errors"
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
 )
-
-// TreeFile is a representation of a file or folder in the filesystem
-type TreeFile struct {
-	Path     string     `yaml:"Path"`
-	Type     string     `yaml:"Type"`
-	Mode     string     `yaml:"Mode"`
-	Size     int64      `yaml:"Size"`
-	Modtime  string     `yaml:"Modtime"`
-	Children []TreeFile `yaml:"Children"`
-}
-
-// TreeWalkType is the abstraction of the walk object
-type TreeWalkType interface {
-	ParseTree() (TreeFile, error)
-}
 
 // TreeWalk is the object that walks through the file system directory given
 type TreeWalk struct {
 	systemPath string
 	ignore     []string
 	writer     UsageWriter
-}
-
-// NewTreeWalk TreeWalk Constructor
-func NewTreeWalk(walkType string, systemPath string, ignore []string, writer UsageWriter) TreeWalkType {
-	if walkType == "CWalk" {
-		return &TreeWalk{systemPath, ignore, writer}
-	} else if walkType == "GoDirWalk" {
-		return &TreeWalk{systemPath, ignore, writer}
-	} else if walkType == "ConcurrentTreeWalk" {
-		return &ConcurrentTreeWalk{systemPath, ignore, writer}
-	} else if walkType == "TreeWalk" {
-		return &TreeWalk{systemPath, ignore, writer}
-	}
-	return &TreeWalk{systemPath, ignore, writer}
 }
 
 // ParseTree is the main entry point implementation of the tree traversal
@@ -56,7 +29,8 @@ func (walker *TreeWalk) recursiveParseTree(currentPath string) (TreeFile, error)
 		return TreeFile{}, err
 	}
 	if stringInSlice(info.Name(), walker.ignore) {
-		return TreeFile{}, errors.New("Ignoring path " + info.Name())
+		log.Println("Ignoring path: " + path.Join(currentPath, info.Name()))
+		return TreeFile{}, nil
 	}
 
 	fileType := "file"
@@ -70,16 +44,25 @@ func (walker *TreeWalk) recursiveParseTree(currentPath string) (TreeFile, error)
 		Modtime: info.ModTime().String(),
 		Size:    info.Size(),
 	}
-	if info.IsDir() {
+	if info.Mode().IsRegular() {
+		data, err := ioutil.ReadFile(currentPath)
+		if err != nil {
+			return returnTree, err
+		}
+		dataSlice := md5.Sum(data)
+		returnTree.Sum = hex.EncodeToString(dataSlice[:])
+	} else {
 		currentDirectory, err := os.Open(currentPath)
 		if err != nil {
 			return TreeFile{}, err
 		}
 		defer currentDirectory.Close()
 
+		// Add symlink support
 		files, err := currentDirectory.Readdir(-1)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return returnTree, nil
 		}
 		for _, fi := range files {
 			if fi.Name() == "." || fi.Name() == ".." {

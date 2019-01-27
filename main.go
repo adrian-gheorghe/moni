@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -9,8 +10,6 @@ import (
 
 func main() {
 	start := time.Now()
-	log.SetFlags(0)
-	log.SetOutput(new(LogWriter))
 
 	var configPath = flag.String("config", "", "path for the configuration file")
 	flag.Parse()
@@ -23,12 +22,22 @@ func main() {
 	configurationProcessor := NewConfigProcessorYml(*configPath)
 	configuration, err := configurationProcessor.load()
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 		os.Exit(1)
 	}
 
+	logFile, err := os.OpenFile(configuration.Log.LogPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("Error opening file: %v", err)
+		os.Exit(1)
+	}
+	defer logFile.Close()
+
+	log.SetFlags(0)
+	log.SetOutput(logFile)
+
 	usageWriter := NewUsageWriter(configuration.Log.MemoryLog, configuration.Log.MemoryLogPath)
-	walker := NewTreeWalk("TreeWalk", configuration.General.Path, configuration.Algorithm.Ignore, *usageWriter)
+	walker := NewTreeWalk("FlatTreeWalk", configuration.General.Path, configuration.Algorithm.Ignore, *usageWriter)
 	processor := NewProcessorExecuter(configuration, walker, *usageWriter)
 	processor.Execute()
 	elapsed := time.Since(start)
