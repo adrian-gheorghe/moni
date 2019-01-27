@@ -1,7 +1,9 @@
 general:
-  interval: "1 hour"
+  periodic: true
+  # Interval value is in seconds
+  interval: 50
   tree_store: ./output.yml
-  path: /Users/adriangheorghe/Projects/targetpractice
+  path: /Users/adriangheorghe/Projects/targetpractice/targetpractice-api
   command_success: "echo SUCCESS"
   command_failure: "echo FAILURE"
 log:

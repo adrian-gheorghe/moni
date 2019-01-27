@@ -10,7 +10,8 @@ import (
 // Config is the representation of the stored config object
 type Config struct {
 	General struct {
-		Interval       string `yaml:"interval"`
+		Periodic       bool   `yaml:"periodic"`
+		Interval       int    `yaml:"interval"`
 		TreeStore      string `yaml:"tree_store"`
 		Path           string `yaml:"path"`
 		CommandSuccess string `yaml:"command_success"`
