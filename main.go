@@ -44,36 +44,21 @@ func execute(configuration Config) {
 	usageWriter := NewUsageWriter(configuration.Log.MemoryLog, configuration.Log.MemoryLogPath)
 	walker := NewTreeWalk("FlatTreeWalk", configuration.General.Path, configuration.Algorithm.Ignore, *usageWriter)
 	processor := NewProcessorExecuter(configuration, walker, *usageWriter)
-	fmt.Println(processor)
 
-	ticker := time.NewTicker(5 * time.Second)
-	quit := make(chan struct{})
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				fmt.Println("Tick")
-			case <-quit:
-				ticker.Stop()
-				return
-			}
+	if configuration.General.Periodic {
+		executeProcessor(processor)
+		ticker := time.NewTicker(time.Duration(configuration.General.Interval) * time.Second)
+		for range ticker.C {
+			executeProcessor(processor)
 		}
-	}()
+	} else {
+		executeProcessor(processor)
+	}
+}
 
-	// ticker := time.NewTicker(time.Duration(configuration.General.Interval) * time.Second)
-	// quit := make(chan struct{})
-	// go func() {
-	// 	for {
-	// 		select {
-	// 		case <-ticker.C:
-	// 			start := time.Now()
-	// 			processor.Execute()
-	// 			elapsed := time.Since(start)
-	// 			log.Printf("Execution %s", elapsed)
-	// 		case <-quit:
-	// 			ticker.Stop()
-	// 			return
-	// 		}
-	// 	}
-	// }()
+func executeProcessor(processor Processor) {
+	start := time.Now()
+	processor.Execute()
+	elapsed := time.Since(start)
+	log.Printf("Execution %s", elapsed)
 }
