@@ -3,7 +3,7 @@ general:
   # Interval value is in seconds
   interval: 50
   tree_store: ./output.yml
-  path: /Users/adriangheorghe/Projects/targetpractice/targetpractice-api
+  path: /Users/adriangheorghe/Projects/WWW/discoverlicious
   command_success: "echo SUCCESS"
   command_failure: "echo FAILURE"
 log:
@@ -11,10 +11,12 @@ log:
   memory_log_path: ./memory.log
   memory_log: true
 algorithm:
-  name: TreeWalk
+  name: FlatTreeWalk
   ignore:
     - ".git"
     - ".idea"
     - ".vscode"
     - ".DS_Store"
     - "node_modules"
+    - "uploads"
+    - "static.tar.gz"

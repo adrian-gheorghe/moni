@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"strings"
 )
 
 // FlatTreeWalk is the object that walks through the file system directory given but stores data in a non hierarchic way
@@ -20,18 +21,21 @@ type FlatTreeWalk struct {
 // ParseTree is the main entry point implementation of the tree traversal
 func (walker *FlatTreeWalk) ParseTree() (TreeFile, error) {
 	returnTree := TreeFile{}
+	returnTree.Children = make([]TreeFile, 0, 100000)
+
 	walker.recursiveParseTree(&returnTree, walker.systemPath)
 	return returnTree, nil
 }
 
 func (walker *FlatTreeWalk) recursiveParseTree(returnTree *TreeFile, currentPath string) error {
+	shortPath := strings.Replace(currentPath, path.Join(walker.systemPath, "/"), "", -1)
 	walker.writer.PrintMemUsage()
 	info, err := os.Lstat(currentPath)
 	if err != nil {
 		return err
 	}
 	if stringInSlice(info.Name(), walker.ignore) {
-		log.Println("Ignoring path: " + currentPath)
+		log.Println("Ignoring path: " + shortPath)
 		return nil
 	}
 
@@ -40,7 +44,7 @@ func (walker *FlatTreeWalk) recursiveParseTree(returnTree *TreeFile, currentPath
 		fileType = "directory"
 	}
 	returnTree.Children = append(returnTree.Children, TreeFile{
-		Path:    currentPath,
+		Path:    shortPath,
 		Type:    fileType,
 		Mode:    info.Mode().String(),
 		Modtime: info.ModTime().String(),
@@ -61,7 +65,7 @@ func (walker *FlatTreeWalk) recursiveParseTree(returnTree *TreeFile, currentPath
 		}
 		defer currentDirectory.Close()
 
-		// Add symlink support
+		//Add symlink support
 		files, err := currentDirectory.Readdir(-1)
 		if err != nil {
 			log.Println(err)
@@ -71,7 +75,6 @@ func (walker *FlatTreeWalk) recursiveParseTree(returnTree *TreeFile, currentPath
 			if fi.Name() == "." || fi.Name() == ".." {
 				continue
 			}
-
 			error := walker.recursiveParseTree(returnTree, path.Join(currentPath, fi.Name()))
 			if error != nil {
 				fmt.Println(error)
