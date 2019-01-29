@@ -35,14 +35,14 @@ func main() {
 	log.SetFlags(0)
 	log.SetOutput(logFile)
 
-	execute(configuration)
+	runConfiguration(configuration)
 
 }
 
-func execute(configuration Config) {
+func runConfiguration(configuration Config) {
 
 	usageWriter := NewUsageWriter(configuration.Log.MemoryLog, configuration.Log.MemoryLogPath)
-	walker := NewTreeWalk("FlatTreeWalk", configuration.General.Path, configuration.Algorithm.Ignore, *usageWriter)
+	walker := NewTreeWalk(configuration.Algorithm.Name, configuration.General.Path, configuration.Algorithm.Ignore, *usageWriter)
 	processor := NewProcessorExecuter(configuration, walker, *usageWriter)
 
 	if configuration.General.Periodic {
@@ -58,6 +58,7 @@ func execute(configuration Config) {
 
 func executeProcessor(processor Processor) {
 	start := time.Now()
+	// TODO: clear logs
 	processor.Execute()
 	elapsed := time.Since(start)
 	log.Printf("Execution %s", elapsed)

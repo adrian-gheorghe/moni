@@ -75,6 +75,7 @@ func (walker *TreeWalk) recursiveParseTree(currentPath string) (TreeFile, error)
 			} else {
 				returnTree.Children = append(returnTree.Children, child)
 			}
+			child = TreeFile{}
 		}
 	}
 	return returnTree, nil

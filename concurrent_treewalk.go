@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"path"
@@ -59,7 +58,7 @@ func (walker *ConcurrentTreeWalk) recursiveParseTree(currentPath string) (TreeFi
 
 			child, error := walker.recursiveParseTree(path.Join(currentPath, fi.Name()))
 			if error != nil {
-				fmt.Println(error)
+				log.Println(error)
 			} else {
 				returnTree.Children = append(returnTree.Children, child)
 			}

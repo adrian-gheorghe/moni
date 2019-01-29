@@ -11,7 +11,7 @@ log:
   memory_log_path: ./memory.log
   memory_log: true
 algorithm:
-  name: ConcurrentTreeWalk
+  name: TreeWalk
   ignore:
     - ".git"
     - ".idea"
