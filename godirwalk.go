@@ -47,11 +47,12 @@ func (walker *GoDirTreeWalk) runParseTree() (TreeFile, error) {
 		panic(err)
 	}
 	directoryTree := TreeFile{
-		Path:    walker.systemPath,
-		Type:    "directory",
-		Mode:    info.Mode().String(),
-		Modtime: info.ModTime().String(),
-		Size:    info.Size(),
+		Path:     walker.systemPath,
+		Type:     "directory",
+		Mode:     info.Mode().String(),
+		Modtime:  info.ModTime().String(),
+		Size:     info.Size(),
+		Children: make([]TreeFile, 0, 100000),
 	}
 
 	defer currentDirectory.Close()
@@ -59,6 +60,12 @@ func (walker *GoDirTreeWalk) runParseTree() (TreeFile, error) {
 	errWalk := godirwalk.Walk(walker.systemPath, &godirwalk.Options{
 		Callback: func(itemPath string, info *godirwalk.Dirent) error {
 			shortPath := strings.Replace(itemPath, path.Join(walker.systemPath, "/"), "", -1)
+
+			if stringInSlice(info.Name(), walker.ignore) {
+				log.Println("Ignoring path: " + walker.systemPath)
+				return nil
+			}
+
 			fileType := "file"
 			if info.IsDir() {
 				fileType = "directory"

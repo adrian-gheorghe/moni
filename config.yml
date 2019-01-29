@@ -1,5 +1,5 @@
 general:
-  periodic: true
+  periodic: false
   # Interval value is in seconds
   interval: 50
   tree_store: ./output.yml
@@ -11,7 +11,7 @@ log:
   memory_log_path: ./memory.log
   memory_log: true
 algorithm:
-  name: GoDirTreeWalk
+  name: FlatTreeWalk
   ignore:
     - ".git"
     - ".idea"
