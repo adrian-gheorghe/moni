@@ -40,8 +40,16 @@ func (walker *FlatTreeWalk) recursiveParseTree(returnTree *TreeFile, currentPath
 	}
 
 	fileType := "file"
+	sum := ""
 	if info.IsDir() {
 		fileType = "directory"
+	} else {
+		data, err := ioutil.ReadFile(currentPath)
+		if err != nil {
+			return err
+		}
+		dataSlice := md5.Sum(data)
+		sum = hex.EncodeToString(dataSlice[:])
 	}
 	returnTree.Children = append(returnTree.Children, TreeFile{
 		Path:    shortPath,
@@ -49,16 +57,10 @@ func (walker *FlatTreeWalk) recursiveParseTree(returnTree *TreeFile, currentPath
 		Mode:    info.Mode().String(),
 		Modtime: info.ModTime().String(),
 		Size:    info.Size(),
+		Sum:     sum,
 	})
-	if info.Mode().IsRegular() {
-		data, err := ioutil.ReadFile(currentPath)
-		if err != nil {
-			return err
-		}
-		dataSlice := md5.Sum(data)
-		returnTree.Sum = hex.EncodeToString(dataSlice[:])
-		data = nil
-	} else {
+
+	if info.Mode().IsDir() {
 		currentDirectory, err := os.Open(currentPath)
 		if err != nil {
 			return err

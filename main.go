@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	var configPath = flag.String("config", "", "path for the configuration file")
+	var configPath = flag.String("config", "./config.yml", "path for the configuration file")
 	flag.Parse()
 
 	if *configPath == "" {

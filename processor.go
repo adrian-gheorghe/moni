@@ -130,8 +130,8 @@ type TreeWalkType interface {
 
 // NewTreeWalk TreeWalk Constructor
 func NewTreeWalk(walkType string, systemPath string, ignore []string, writer UsageWriter) TreeWalkType {
-	if walkType == "GoDirWalk" {
-		return &TreeWalk{systemPath, ignore, writer}
+	if walkType == "GoDirTreeWalk" {
+		return &GoDirTreeWalk{systemPath, ignore, writer}
 	} else if walkType == "ConcurrentTreeWalk" {
 		return &ConcurrentTreeWalk{systemPath, ignore, writer}
 	} else if walkType == "FlatTreeWalk" {
