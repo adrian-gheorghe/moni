@@ -43,7 +43,7 @@ func runConfiguration(configuration Config) {
 
 	usageWriter := NewUsageWriter(configuration.Log.MemoryLog, configuration.Log.MemoryLogPath)
 	walker := NewTreeWalk(configuration.Algorithm.Name, configuration.General.Path, configuration.Algorithm.Ignore, *usageWriter)
-	processor := NewProcessorExecuter(configuration, walker, *usageWriter)
+	processor := NewProcessor(configuration.Algorithm.Processor, configuration, walker, *usageWriter)
 
 	if configuration.General.Periodic {
 		executeProcessor(processor)

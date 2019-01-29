@@ -18,20 +18,25 @@ type Processor interface {
 	WriteOutput([]byte) error
 }
 
-// NewProcessorExecuter is the constructor for ProcessorExecuter
-func NewProcessorExecuter(configuration Config, walker TreeWalkType, writer UsageWriter) Processor {
-	return &ProcessorExecuter{configuration, walker, writer}
+// NewProcessor Processor Constructor
+func NewProcessor(processorType string, configuration Config, walker TreeWalkType, writer UsageWriter) Processor {
+	if processorType == "ObjectProcessor" {
+		return &ObjectProcessor{configuration, walker, writer}
+	} else if processorType == "DirectWriteProcessor" {
+		return &ObjectProcessor{configuration, walker, writer}
+	}
+	return &ObjectProcessor{configuration, walker, writer}
 }
 
-// ProcessorExecuter is the implementation of the Executer
-type ProcessorExecuter struct {
+// ObjectProcessor is the implementation of the Executer
+type ObjectProcessor struct {
 	Configuration Config
 	Walker        TreeWalkType
 	Writer        UsageWriter
 }
 
 // Execute is the implementation of the actual processing method.
-func (processor *ProcessorExecuter) Execute() {
+func (processor *ObjectProcessor) Execute() {
 	processor.Writer.PrintMemUsage()
 	log.SetFlags(log.Lshortfile)
 
@@ -44,9 +49,9 @@ func (processor *ProcessorExecuter) Execute() {
 	if err != nil {
 		log.Panic(err)
 	}
-	treeJSON, _ := processor.ProcessTreeObject(tree)
+	treeYAML, _ := processor.ProcessTreeObject(tree)
 	processor.Writer.PrintMemUsage()
-	processor.WriteOutput(treeJSON)
+	processor.WriteOutput(treeYAML)
 	currentTree, err := processor.GetPreviousObjectTree(processor.Configuration.General.TreeStore)
 
 	if !cmp.Equal(currentTree, previousTree) {
@@ -64,7 +69,7 @@ func (processor *ProcessorExecuter) Execute() {
 }
 
 // ProcessTree is the implementation of the tree process method
-func (processor *ProcessorExecuter) ProcessTree() (TreeFile, error) {
+func (processor *ObjectProcessor) ProcessTree() (TreeFile, error) {
 	tree := TreeFile{}
 	tree, err := processor.Walker.ParseTree()
 
@@ -75,13 +80,13 @@ func (processor *ProcessorExecuter) ProcessTree() (TreeFile, error) {
 }
 
 // ProcessTreeObject is the implementation of the tree process method
-func (processor *ProcessorExecuter) ProcessTreeObject(tree TreeFile) ([]byte, error) {
+func (processor *ObjectProcessor) ProcessTreeObject(tree TreeFile) ([]byte, error) {
 	treeProcessed, err := yaml.Marshal(tree)
 	return treeProcessed, err
 }
 
 // GetPreviousObjectTree is the implementation of the tree compare method
-func (processor *ProcessorExecuter) GetPreviousObjectTree(objectPath string) (TreeFile, error) {
+func (processor *ObjectProcessor) GetPreviousObjectTree(objectPath string) (TreeFile, error) {
 	yamlContent, err := ioutil.ReadFile(objectPath)
 	if err != nil {
 		log.Println(err)
@@ -97,13 +102,13 @@ func (processor *ProcessorExecuter) GetPreviousObjectTree(objectPath string) (Tr
 }
 
 // WriteOutput is the output log for the ProcessorExecuter
-func (processor *ProcessorExecuter) WriteOutput(treeJSON []byte) error {
+func (processor *ObjectProcessor) WriteOutput(treeYAML []byte) error {
 	processor.Writer.PrintMemUsage()
-	return ioutil.WriteFile(processor.Configuration.General.TreeStore, treeJSON, 0644)
+	return ioutil.WriteFile(processor.Configuration.General.TreeStore, treeYAML, 0644)
 }
 
 // ExecuteCommand is run when a tree is parsed and is different or equal to the previous tree
-func (processor *ProcessorExecuter) ExecuteCommand(command string) {
+func (processor *ObjectProcessor) ExecuteCommand(command string) {
 	out, err := exec.Command("sh", "-c", command).Output()
 	if err != nil {
 		log.Panicln(err)

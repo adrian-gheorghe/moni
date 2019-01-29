@@ -12,6 +12,7 @@ log:
   memory_log: true
 algorithm:
   name: FlatTreeWalk
+  processor: DirectWriteProcessor
   ignore:
     - ".git"
     - ".idea"

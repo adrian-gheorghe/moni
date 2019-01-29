@@ -23,8 +23,9 @@ type Config struct {
 		MemoryLogPath string `yaml:"memory_log_path"`
 	} `yaml:"log"`
 	Algorithm struct {
-		Name   string   `yaml:"name"`
-		Ignore []string `yaml:"ignore"`
+		Name      string   `yaml:"name"`
+		Processor string   `yaml:"processor"`
+		Ignore    []string `yaml:"ignore"`
 	} `yaml:"algorithm"`
 }
 
