@@ -31,7 +31,7 @@ func (walker *FlatTreeWalk) recursiveParseTree(returnTree *TreeFile, currentPath
 		return err
 	}
 	if stringInSlice(info.Name(), walker.ignore) {
-		log.Println("Ignoring path: " + path.Join(currentPath, info.Name()))
+		log.Println("Ignoring path: " + currentPath)
 		return nil
 	}
 
@@ -53,6 +53,7 @@ func (walker *FlatTreeWalk) recursiveParseTree(returnTree *TreeFile, currentPath
 		}
 		dataSlice := md5.Sum(data)
 		returnTree.Sum = hex.EncodeToString(dataSlice[:])
+		data = nil
 	} else {
 		currentDirectory, err := os.Open(currentPath)
 		if err != nil {

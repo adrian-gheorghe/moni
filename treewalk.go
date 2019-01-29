@@ -29,7 +29,7 @@ func (walker *TreeWalk) recursiveParseTree(currentPath string) (TreeFile, error)
 		return TreeFile{}, err
 	}
 	if stringInSlice(info.Name(), walker.ignore) {
-		log.Println("Ignoring path: " + path.Join(currentPath, info.Name()))
+		log.Println("Ignoring path: " + currentPath)
 		return TreeFile{}, nil
 	}
 
