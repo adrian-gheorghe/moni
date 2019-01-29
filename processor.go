@@ -61,10 +61,6 @@ func (processor *ProcessorExecuter) Execute() {
 			processor.ExecuteCommand(processor.Configuration.General.CommandSuccess)
 		}
 	}
-	tree = TreeFile{}
-	treeJSON = nil
-	currentTree = TreeFile{}
-	previousTree = TreeFile{}
 }
 
 // ProcessTree is the implementation of the tree process method
@@ -134,9 +130,7 @@ type TreeWalkType interface {
 
 // NewTreeWalk TreeWalk Constructor
 func NewTreeWalk(walkType string, systemPath string, ignore []string, writer UsageWriter) TreeWalkType {
-	if walkType == "CWalk" {
-		return &CWalk{systemPath, ignore, writer}
-	} else if walkType == "GoDirWalk" {
+	if walkType == "GoDirWalk" {
 		return &TreeWalk{systemPath, ignore, writer}
 	} else if walkType == "ConcurrentTreeWalk" {
 		return &ConcurrentTreeWalk{systemPath, ignore, writer}

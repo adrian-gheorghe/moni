@@ -35,7 +35,7 @@ func (walker *FlatTreeWalk) recursiveParseTree(returnTree *TreeFile, currentPath
 		return err
 	}
 	if stringInSlice(info.Name(), walker.ignore) {
-		log.Println("Ignoring path: " + shortPath)
+		log.Println("Ignoring path: " + currentPath)
 		return nil
 	}
 
