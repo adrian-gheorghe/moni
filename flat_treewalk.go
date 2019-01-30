@@ -20,14 +20,12 @@ type FlatTreeWalk struct {
 
 // ParseTree is the main entry point implementation of the tree traversal
 func (walker *FlatTreeWalk) ParseTree() (TreeFile, error) {
-	returnTree := TreeFile{}
-	returnTree.Children = make([]TreeFile, 0, 100000)
-
+	returnTree := make([]TreeFile, 0, 100000)
 	walker.recursiveParseTree(&returnTree, walker.systemPath)
 	return returnTree, nil
 }
 
-func (walker *FlatTreeWalk) recursiveParseTree(returnTree *TreeFile, currentPath string) error {
+func (walker *FlatTreeWalk) recursiveParseTree(returnTree *[]TreeFile, currentPath string) error {
 	shortPath := strings.Replace(currentPath, path.Join(walker.systemPath, "/"), "", -1)
 	walker.writer.PrintMemUsage()
 	info, err := os.Lstat(currentPath)

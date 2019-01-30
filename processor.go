@@ -12,10 +12,7 @@ import (
 // Processor is the abstraction of the main execution of the program
 type Processor interface {
 	Execute()
-	ProcessTree() (TreeFile, error)
-	ProcessTreeObject(tree TreeFile) ([]byte, error)
-	GetPreviousObjectTree(string) (TreeFile, error)
-	WriteOutput([]byte) error
+	ExecuteCommand(string)
 }
 
 // NewProcessor Processor Constructor
@@ -119,13 +116,12 @@ func (processor *ObjectProcessor) ExecuteCommand(command string) {
 
 // TreeFile is a representation of a file or folder in the filesystem
 type TreeFile struct {
-	Path     string     `yaml:"Path"`
-	Type     string     `yaml:"Type"`
-	Mode     string     `yaml:"Mode"`
-	Size     int64      `yaml:"Size"`
-	Modtime  string     `yaml:"Modtime"`
-	Sum      string     `yaml:"Sum"`
-	Children []TreeFile `yaml:"Children"`
+	Path    string `yaml:"Path"`
+	Type    string `yaml:"Type"`
+	Mode    string `yaml:"Mode"`
+	Size    int64  `yaml:"Size"`
+	Modtime string `yaml:"Modtime"`
+	Sum     string `yaml:"Sum"`
 }
 
 // TreeWalkType is the abstraction of the walk object
@@ -141,8 +137,6 @@ func NewTreeWalk(walkType string, systemPath string, ignore []string, writer Usa
 		return &ConcurrentTreeWalk{systemPath, ignore, writer}
 	} else if walkType == "FlatTreeWalk" {
 		return &FlatTreeWalk{systemPath, ignore, writer}
-	} else if walkType == "TreeWalk" {
-		return &TreeWalk{systemPath, ignore, writer}
 	}
-	return &TreeWalk{systemPath, ignore, writer}
+	return &FlatTreeWalk{systemPath, ignore, writer}
 }
