@@ -23,7 +23,7 @@ func NewProcessor(processorType string, configuration Config, walker TreeWalkTyp
 	if processorType == "ObjectProcessor" {
 		return &ObjectProcessor{configuration, walker, writer}
 	} else if processorType == "DirectWriteProcessor" {
-		return &ObjectProcessor{configuration, walker, writer}
+		return &DirectWriteProcessor{configuration, walker, writer}
 	}
 	return &ObjectProcessor{configuration, walker, writer}
 }
