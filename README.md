@@ -18,9 +18,9 @@ general:
   tree_store: ./output.json
   # Path to parse
   path: /var/www/html
-  # Command that should run if the tree is identical to the previous one
+  # Command that is run if the tree is identical to the previous one
   command_success: "echo SUCCESS"
-  # 
+  # Command that is run if the tree is not identical to the previous one
   command_failure: "echo FAILURE"
 log:
   # Log path for moni  
@@ -45,3 +45,4 @@ algorithm:
 ```
 
 ## Usage
+./moni --config="./config.yml"
