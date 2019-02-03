@@ -1,6 +1,7 @@
 # moni
 
 [![CircleCI](https://circleci.com/gh/adrian-gheorghe/moni.svg?style=svg)](https://circleci.com/gh/adrian-gheorghe/moni)
+
 moni (short for monitoring) is a utility that scans your file system periodically and alerts you when your file signatures have changed. Can be configured to execute different commands on failure or success.
 
 ## Download
@@ -45,4 +46,17 @@ algorithm:
 ```
 
 ## Usage
+
+```bash
+./moni --help
+Usage of ./moni:
+  -config string
+    	path for the configuration file (default "./config.yml")
+  -version
+    	Prints current version
+```
+Run moni with the config flag pointing to the path to your configuration yml file. The default config path is config.yml in the current directory
+
+```bash
 ./moni --config="./config.yml"
+```
