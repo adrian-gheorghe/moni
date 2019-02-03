@@ -6,7 +6,11 @@ jobs:
       - image: circleci/golang:1.11
     steps:
       - checkout
-      - run: go test -v ./...  
+      - run: 
+          command: |
+            go get -u github.com/google/go-cmp/cmp
+            go get -u github.com/karrick/godirwalk
+            go test -v ./...  
   build:
     docker:
       - image: circleci/golang:1.11
@@ -16,18 +20,18 @@ jobs:
           command: |
             mkdir -p ./artefacts
             cp VERSION ./artefacts/VERSION
-            CGO_ENABLED=0 GOOS=linux go build -o ./artefacts/hacked-linux
-            CGO_ENABLED=0 GOOS=darwin go build -o ./artefacts/hacked-darwin
-            CGO_ENABLED=0 GOOS=windows go build -o ./artefacts/hacked-windows
-            CGO_ENABLED=0 go build -o ./artefacts/hacked
+            CGO_ENABLED=0 GOOS=linux go build -o ./artefacts/moni-linux
+            CGO_ENABLED=0 GOOS=darwin go build -o ./artefacts/moni-darwin
+            CGO_ENABLED=0 GOOS=windows go build -o ./artefacts/moni-windows
+            CGO_ENABLED=0 go build -o ./artefacts/moni
             ls -al ./artefacts
       - persist_to_workspace:
           root: artefacts
           paths:
-            - hacked-linux
-            - hacked-darwin
-            - hacked-windows
-            - hacked
+            - moni-linux
+            - moni-darwin
+            - moni-windows
+            - moni
             - VERSION
   release:
     docker:
