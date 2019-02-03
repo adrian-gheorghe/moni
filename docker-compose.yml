@@ -1,0 +1,10 @@
+version: '3.3'
+services:
+  moni:
+    build:
+      context: .
+    volumes:
+      - ./testdata:/var/www/html
+    environment:
+      CONFIG_PATH: /app/config.yml
+    

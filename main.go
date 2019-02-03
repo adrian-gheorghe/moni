@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-var appVersion = "0.1.0"
+var appVersion = "0.2.0"
 
 func main() {
 	log.SetFlags(0)
@@ -42,13 +42,17 @@ func mainExecution(version bool, configPath string) int {
 }
 
 func setLog(configuration Config) {
-	logFile, err := os.OpenFile(configuration.Log.LogPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatalf("Error opening file: %v", err)
-		os.Exit(1)
+	if configuration.Log.LogPath == "stdout" {
+		log.SetOutput(os.Stdout)
+	} else {
+		logFile, err := os.OpenFile(configuration.Log.LogPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			log.Fatalf("Error opening file: %v", err)
+			os.Exit(1)
+		}
+		defer logFile.Close()
+		log.SetOutput(logFile)
 	}
-	defer logFile.Close()
-	log.SetOutput(logFile)
 }
 
 func runConfiguration(configuration Config) {
