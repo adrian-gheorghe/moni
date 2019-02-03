@@ -1,12 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"os/exec"
 
 	"github.com/google/go-cmp/cmp"
-	yaml "gopkg.in/yaml.v2"
 )
 
 // Processor is the abstraction of the main execution of the program
@@ -19,8 +19,6 @@ type Processor interface {
 func NewProcessor(processorType string, configuration Config, walker TreeWalkType, writer UsageWriter) Processor {
 	if processorType == "ObjectProcessor" {
 		return &ObjectProcessor{configuration, walker, writer}
-	} else if processorType == "DirectWriteProcessor" {
-		return &DirectWriteProcessor{configuration, walker, writer}
 	}
 	return &ObjectProcessor{configuration, walker, writer}
 }
@@ -37,19 +35,19 @@ func (processor *ObjectProcessor) Execute() {
 	processor.Writer.PrintMemUsage()
 	log.SetFlags(log.Lshortfile)
 
-	tree, err := processor.ProcessTree()
+	currentTree, err := processor.ProcessTree()
 	if err != nil {
-		log.Panic(err)
+		log.Println(err)
 	}
 	// get previous object tree
 	previousTree, err := processor.GetPreviousObjectTree(processor.Configuration.General.TreeStore)
 	if err != nil {
-		log.Panic(err)
+		log.Println(err)
 	}
-	treeYAML, _ := processor.ProcessTreeObject(tree)
+
+	currentTreeString, _ := processor.ProcessTreeObject(currentTree)
 	processor.Writer.PrintMemUsage()
-	processor.WriteOutput(treeYAML)
-	currentTree, err := processor.GetPreviousObjectTree(processor.Configuration.General.TreeStore)
+	processor.WriteOutput(currentTreeString)
 
 	if !cmp.Equal(currentTree, previousTree) {
 		log.Println("Tree has changed")
@@ -78,23 +76,21 @@ func (processor *ObjectProcessor) ProcessTree() (TreeFile, error) {
 
 // ProcessTreeObject is the implementation of the tree process method
 func (processor *ObjectProcessor) ProcessTreeObject(tree TreeFile) ([]byte, error) {
-	treeProcessed, err := yaml.Marshal(tree)
+	treeProcessed, err := json.MarshalIndent(tree, "", "\t")
 	return treeProcessed, err
 }
 
 // GetPreviousObjectTree is the implementation of the tree compare method
 func (processor *ObjectProcessor) GetPreviousObjectTree(objectPath string) (TreeFile, error) {
-	yamlContent, err := ioutil.ReadFile(objectPath)
+	content, err := ioutil.ReadFile(objectPath)
 	if err != nil {
-		log.Println(err)
+		return TreeFile{}, err
 	}
 	tree := TreeFile{}
-
-	err = yaml.Unmarshal(yamlContent, &tree)
+	err = json.Unmarshal(content, &tree)
 	if err != nil {
 		log.Println(err)
 	}
-
 	return tree, err
 }
 
@@ -116,12 +112,13 @@ func (processor *ObjectProcessor) ExecuteCommand(command string) {
 
 // TreeFile is a representation of a file or folder in the filesystem
 type TreeFile struct {
-	Path    string `yaml:"Path"`
-	Type    string `yaml:"Type"`
-	Mode    string `yaml:"Mode"`
-	Size    int64  `yaml:"Size"`
-	Modtime string `yaml:"Modtime"`
-	Sum     string `yaml:"Sum"`
+	Path     string     `json:"Path"`
+	Type     string     `json:"Type"`
+	Mode     string     `json:"Mode"`
+	Size     int64      `json:"Size"`
+	Modtime  string     `json:"Modtime"`
+	Sum      string     `json:"Sum"`
+	Children []TreeFile `json:"Children"`
 }
 
 // TreeWalkType is the abstraction of the walk object
@@ -133,8 +130,6 @@ type TreeWalkType interface {
 func NewTreeWalk(walkType string, systemPath string, ignore []string, writer UsageWriter) TreeWalkType {
 	if walkType == "GoDirTreeWalk" {
 		return &GoDirTreeWalk{systemPath, ignore, writer}
-	} else if walkType == "ConcurrentTreeWalk" {
-		return &ConcurrentTreeWalk{systemPath, ignore, writer}
 	} else if walkType == "FlatTreeWalk" {
 		return &FlatTreeWalk{systemPath, ignore, writer}
 	}

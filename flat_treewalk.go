@@ -8,7 +8,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"strings"
 )
 
 // FlatTreeWalk is the object that walks through the file system directory given but stores data in a non hierarchic way
@@ -20,20 +19,20 @@ type FlatTreeWalk struct {
 
 // ParseTree is the main entry point implementation of the tree traversal
 func (walker *FlatTreeWalk) ParseTree() (TreeFile, error) {
-	returnTree := make([]TreeFile, 0, 100000)
-	walker.recursiveParseTree(&returnTree, walker.systemPath)
+	returnTree := TreeFile{}
+	counter := 0
+	walker.recursiveParseTree(&returnTree, walker.systemPath, &counter)
+	log.Println("File count: ", counter)
 	return returnTree, nil
 }
 
-func (walker *FlatTreeWalk) recursiveParseTree(returnTree *[]TreeFile, currentPath string) error {
-	shortPath := strings.Replace(currentPath, path.Join(walker.systemPath, "/"), "", -1)
+func (walker *FlatTreeWalk) recursiveParseTree(returnTree *TreeFile, currentPath string, counter *int) error {
 	walker.writer.PrintMemUsage()
-	info, err := os.Lstat(currentPath)
+	info, err := os.Stat(currentPath)
 	if err != nil {
 		return err
 	}
 	if stringInSlice(info.Name(), walker.ignore) {
-		log.Println("Ignoring path: " + currentPath)
 		return nil
 	}
 
@@ -50,13 +49,14 @@ func (walker *FlatTreeWalk) recursiveParseTree(returnTree *[]TreeFile, currentPa
 		sum = hex.EncodeToString(dataSlice[:])
 	}
 	returnTree.Children = append(returnTree.Children, TreeFile{
-		Path:    shortPath,
+		Path:    currentPath,
 		Type:    fileType,
 		Mode:    info.Mode().String(),
 		Modtime: info.ModTime().String(),
 		Size:    info.Size(),
 		Sum:     sum,
 	})
+	*counter++
 
 	if info.Mode().IsDir() {
 		currentDirectory, err := os.Open(currentPath)
@@ -75,7 +75,7 @@ func (walker *FlatTreeWalk) recursiveParseTree(returnTree *[]TreeFile, currentPa
 			if fi.Name() == "." || fi.Name() == ".." {
 				continue
 			}
-			error := walker.recursiveParseTree(returnTree, path.Join(currentPath, fi.Name()))
+			error := walker.recursiveParseTree(returnTree, path.Join(currentPath, fi.Name()), counter)
 			if error != nil {
 				fmt.Println(error)
 			}

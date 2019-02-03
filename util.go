@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"strings"
 )
 
 // LogWriterInterface is the abstraction of the Log Writer
@@ -23,6 +24,15 @@ func (writer LogWriter) Write(bytes []byte) (int, error) {
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
+			return true
+		}
+	}
+	return false
+}
+
+func stringHasParent(a string, list []string) bool {
+	for _, b := range list {
+		if strings.HasPrefix(a, b) {
 			return true
 		}
 	}

@@ -2,16 +2,23 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"time"
 )
 
-func main() {
+var appVersion = "0.1.0"
 
+func main() {
+	log.SetFlags(0)
 	var configPath = flag.String("config", "./config.yml", "path for the configuration file")
+	var version = flag.Bool("version", false, "Prints current version")
 	flag.Parse()
+
+	if *version {
+		log.Println(appVersion)
+		os.Exit(0)
+	}
 
 	if *configPath == "" {
 		log.Println("Configuration file has not been set up")
@@ -21,7 +28,7 @@ func main() {
 	configurationProcessor := NewConfigProcessorYml(*configPath)
 	configuration, err := configurationProcessor.load()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 
@@ -31,8 +38,6 @@ func main() {
 		os.Exit(1)
 	}
 	defer logFile.Close()
-
-	log.SetFlags(0)
 	log.SetOutput(logFile)
 
 	runConfiguration(configuration)
@@ -58,7 +63,6 @@ func runConfiguration(configuration Config) {
 
 func executeProcessor(processor Processor) {
 	start := time.Now()
-	// TODO: clear logs
 	processor.Execute()
 	elapsed := time.Since(start)
 	log.Printf("Execution %s", elapsed)
