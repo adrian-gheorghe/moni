@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-var appVersion = "0.2.0"
+var appVersion = "0.3.0"
 
 func main() {
 	log.SetFlags(0)
