@@ -60,3 +60,17 @@ Run moni with the config flag pointing to the path to your configuration yml fil
 ```bash
 ./moni --config="./config.yml"
 ```
+
+## Docker Configuration
+You can use the official image from Docker Hub to raise a container that monitors files in a volume. https://cloud.docker.com/repository/docker/adighe/moni . You can change the configuration by changing the environment variable CONFIG_PATH to your config.ym file. The configuration embedded in the container is the default one from sample.docker.config.yml
+
+```yaml
+version: '3.3'
+services:
+  moni:
+    image: adighe/moni:latest
+    volumes:
+      - ./:/var/www/html
+    environment:
+      CONFIG_PATH: /app/config.yml   
+```
