@@ -1,0 +1,22 @@
+general:
+  periodic: true
+  # Interval value is in seconds
+  interval: 50
+  tree_store: ./output.json
+  path: /Users/adriangheorghe/Projects/targetpractice/targetpractice-api
+  command_success: "echo SUCCESS"
+  command_failure: "echo FAILURE"
+log:
+  log_path: ./log.log
+  memory_log_path: ./memory.log
+  memory_log: false
+algorithm:
+  name: FlatTreeWalk
+  processor: ObjectProcessor
+  ignore:
+    - ".git"
+    - ".idea"
+    - ".vscode"
+    - ".DS_Store"
+    - "node_modules"
+    - "uploads"

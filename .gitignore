@@ -1,3 +1,6 @@
+output.yml
 output.json
 .vscode
 launch.json
+memory.log
+log.log
