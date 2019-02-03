@@ -2,7 +2,8 @@ FROM alpine:3.8
 
 COPY VERSION /app/VERSION
 
-RUN RELEASE_VERSION=$(</app/VERSION) && \
+RUN RELEASE_VERSION=$(cat /app/VERSION) && \
+    echo $RELEASE_VERSION && \
     mkdir -p /app && \
     wget -O /app/moni "https://github.com/adrian-gheorghe/moni/releases/download/${RELEASE_VERSION}/moni-linux" && \
     chmod +x /app/moni && \
