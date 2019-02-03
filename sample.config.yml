@@ -1,8 +1,8 @@
 general:
   # Should moni keep running and execute periodically  
-  periodic: true
+  periodic: false
   # If periodic is true, what interval should moni run at? Interval value is in seconds
-  interval: 50
+  interval: 3600
   # Tree is stored as a json to the following path
   tree_store: ./output.json
   # Path to parse

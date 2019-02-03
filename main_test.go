@@ -1,30 +1,43 @@
-// +build unit
-
 package main
 
 import (
+	"bytes"
+	"log"
+	"os"
 	"testing"
 )
 
-func TestExecutution(t *testing.T) {
-	if 2 != 2 {
-		t.Error("Expected 2 != 4")
-	}
-	cases := []struct {
-		Name           string
-		A, B, Expected int
-	}{
-		{"Test fist item", 1, 1, 2},
-		{"Test second item", 2, 4, 6},
-		{"Another one", 2, 8, 10},
-	}
+func TestVersion(t *testing.T) {
+	// Set custom logger
+	log.SetFlags(0)
 
-	for _, tc := range cases {
-		t.Run(tc.Name, func(t *testing.T) {
-			actual := tc.A + tc.B
-			if actual != tc.A+tc.B {
-				t.Fatal("failure")
-			}
-		})
+	var testVersion = true
+	var testConfigPath = "./testdata/config.yml"
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	mainExecution(testVersion, testConfigPath)
+	log.SetOutput(os.Stderr)
+	out := buf.String()
+
+	if out != appVersion+"\n" {
+		t.Fatal("Failure")
+	}
+}
+
+func TestConfiguration(t *testing.T) {
+	// Set custom logger
+	log.SetFlags(0)
+
+	var testVersion = false
+	var testConfigPath = ""
+
+	var buf bytes.Buffer
+	log.SetOutput(&buf)
+	mainExecution(testVersion, testConfigPath)
+	log.SetOutput(os.Stderr)
+	out := buf.String()
+	if out != "Configuration file has not been set up\n" {
+		t.Fatal("Failure" + out)
 	}
 }
