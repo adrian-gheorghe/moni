@@ -14,24 +14,34 @@ func main() {
 	var configPath = flag.String("config", "./config.yml", "path for the configuration file")
 	var version = flag.Bool("version", false, "Prints current version")
 	flag.Parse()
+	exitCode := mainExecution(*version, *configPath)
+	os.Exit(exitCode)
+}
 
-	if *version {
+func mainExecution(version bool, configPath string) int {
+	if version {
 		log.Println(appVersion)
-		os.Exit(0)
+		return 0
 	}
 
-	if *configPath == "" {
+	if configPath == "" {
 		log.Println("Configuration file has not been set up")
-		os.Exit(1)
+		return 1
 	}
 
-	configurationProcessor := NewConfigProcessorYml(*configPath)
+	configurationProcessor := NewConfigProcessorYml(configPath)
 	configuration, err := configurationProcessor.load()
 	if err != nil {
 		log.Println(err)
-		os.Exit(1)
+		return 1
 	}
 
+	setLog(configuration)
+	runConfiguration(configuration)
+	return 0
+}
+
+func setLog(configuration Config) {
 	logFile, err := os.OpenFile(configuration.Log.LogPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("Error opening file: %v", err)
@@ -39,9 +49,6 @@ func main() {
 	}
 	defer logFile.Close()
 	log.SetOutput(logFile)
-
-	runConfiguration(configuration)
-
 }
 
 func runConfiguration(configuration Config) {
