@@ -2,13 +2,13 @@
 
 [![CircleCI](https://circleci.com/gh/adrian-gheorghe/moni.svg?style=svg)](https://circleci.com/gh/adrian-gheorghe/moni)
 
-moni (short for monitoring) is a utility that scans your file system periodically and alerts you when your file signatures have changed. Can be configured to execute different commands on failure or success.
+moni (short for monitoring) is a utility written in go that scans your file system periodically and alerts you when your file signatures have changed. Can be configured to execute different commands on failure or success.
 
 ## Download
 Download latest from the releases page: https://github.com/adrian-gheorghe/moni/releases
 
 ## Docker Configuration
-You can use the image from Docker Hub to raise a container that monitors files in a volume. https://cloud.docker.com/repository/docker/adighe/moni . You can change the configuration by changing the environment variable CONFIG_PATH to your config.yml file and mounting your file to the container. The configuration embedded in the container is the default one from sample.docker.config.yml. Logs are sent to stdout for this configuration
+You can use the image from Docker Hub to raise a container that monitors files in a volume. https://hub.docker.com/r/adighe/moni/ . You can change the configuration by changing the environment variable CONFIG_PATH to your config.yml file and mounting your file to the container. The configuration embedded in the container is the default one from sample.docker.config.yml. Logs are sent to stdout for this configuration
 
 ```yaml
 version: '3.3'
