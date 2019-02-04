@@ -6,5 +6,5 @@ services:
     volumes:
       - ./testdata:/var/www/html
     environment:
-      CONFIG_PATH: /app/config.yml
+      CONFIG_PATH:/var/www/html/config.yml
     
