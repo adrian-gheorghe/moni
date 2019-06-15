@@ -75,6 +75,12 @@ Run moni with the config flag pointing to the path to your configuration yml fil
 ./moni --config="./config.yml"
 ```
 
+moni can be run with inline parameters as well
+
+```bash
+./moni --periodic=false --path=./testdata --algorithm_name="MediafakerTreeWalk" --ignore=".git" --ignore=".circleci"
+```
+
 ## Sample output from Docker container
 
 ```bash

@@ -21,6 +21,7 @@ algorithm:
   # Algorithm options are:
   # - FlatTreeWalk (manual recursive treewalk)  
   # - GoDirTreeWalk - walk algorithm developed by karrick - https://github.com/karrick/godirwalk
+  # - MediafakerTreeWalk - FlatTreeWalk algorithm that also stores small file content and image
   name: FlatTreeWalk
   processor: ObjectProcessor
   # List of directory / file names moni should ignore
@@ -31,3 +32,5 @@ algorithm:
     - ".DS_Store"
     - "node_modules"
     - "uploads"
+  # MediafakerTreeWalk stores the file content in the tree output. What is the maximum file size it should do this for? (kb)  
+  content_store_max_size: 300
