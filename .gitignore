@@ -4,3 +4,4 @@ output.json
 launch.json
 memory.log
 log.log
+.DS_Store

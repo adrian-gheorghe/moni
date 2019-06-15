@@ -6,6 +6,7 @@ import (
 	"log"
 	"os/exec"
 
+	imageProcessors "github.com/adrian-gheorghe/mediafaker-processors"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -112,13 +113,16 @@ func (processor *ObjectProcessor) ExecuteCommand(command string) {
 
 // TreeFile is a representation of a file or folder in the filesystem
 type TreeFile struct {
-	Path     string     `json:"Path"`
-	Type     string     `json:"Type"`
-	Mode     string     `json:"Mode"`
-	Size     int64      `json:"Size"`
-	Modtime  string     `json:"Modtime"`
-	Sum      string     `json:"Sum"`
-	Children []TreeFile `json:"Children"`
+	Path      string                    `json:"Path"`
+	Type      string                    `json:"Type"`
+	Mode      string                    `json:"Mode"`
+	Size      int64                     `json:"Size"`
+	Modtime   string                    `json:"Modtime"`
+	Sum       string                    `json:"Sum"`
+	MediaType string                    `json:MediaType`
+	Content   string                    `json:"Content"`
+	ImageInfo imageProcessors.ImageInfo `json:"ImageInfo"`
+	Children  []TreeFile                `json:"Children"`
 }
 
 // TreeWalkType is the abstraction of the walk object
@@ -127,11 +131,20 @@ type TreeWalkType interface {
 }
 
 // NewTreeWalk TreeWalk Constructor
-func NewTreeWalk(walkType string, systemPath string, ignore []string, writer UsageWriter) TreeWalkType {
+func NewTreeWalk(walkType string, systemPath string, ignore []string, writer UsageWriter, contentStoreMaxSize int) TreeWalkType {
 	if walkType == "GoDirTreeWalk" {
 		return &GoDirTreeWalk{systemPath, ignore, writer}
 	} else if walkType == "FlatTreeWalk" {
 		return &FlatTreeWalk{systemPath, ignore, writer}
+	} else if walkType == "MediafakerTreeWalk" {
+		return &MediafakerTreeWalk{systemPath, ignore, writer, contentStoreMaxSize}
 	}
 	return &FlatTreeWalk{systemPath, ignore, writer}
+}
+
+// ImageInfo reflects information required by mediafaker to recreate the file. This amounts to width height and pixel info
+type ImageInfo struct {
+	Width     string `json:"Width"`
+	Height    string `json:"Height"`
+	PixelInfo string
 }

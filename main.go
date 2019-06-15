@@ -7,14 +7,35 @@ import (
 	"time"
 )
 
-var appVersion = "0.5.0"
+var appVersion = "0.6.0"
 
 func main() {
 	log.SetFlags(0)
-	var configPath = flag.String("config", "./config.yml", "path for the configuration file")
+	var exitCode = 0
+	var ignore arrayFlags
+
+	var configPath = flag.String("config", "", "path for the configuration file")
 	var version = flag.Bool("version", false, "Prints current version")
+	var periodic = flag.Bool("periodic", false, "Should moni keep running and execute periodically ")
+	var interval = flag.Int("interval", 3600, "If periodic is true, what interval should moni run at? Interval value is in seconds")
+	var treeStore = flag.String("tree_store", "./output.json", "Tree is stored as a json to the following path")
+	var path = flag.String("path", "", "Path to parse")
+	var commandSuccess = flag.String("command_success", "", "Command that should run if the tree is identical to the previous one")
+	var commandFailure = flag.String("command_failure", "", "Command that should run if the tree is different")
+
+	var logPath = flag.String("log_path", "stdout", "Log path for moni")
+	var algorithmName = flag.String("algorithm_name", "FlatTreeWalk", "Algorithm applied. Options are: FlatTreeWalk/GoDirTreeWalk/MediafakerTreeWalk")
+	var processorName = flag.String("processor", "ObjectProcessor", "Object Processor")
+	var contentStoreMaxSize = flag.Int("content_store_max_size", 300, "MediafakerTreeWalk stores the file content in the tree output. What is the maximum file size it should do this for? (kb)")
+	flag.Var(&ignore, "ignore", "List of directory / file names moni should ignore")
+
 	flag.Parse()
-	exitCode := mainExecution(*version, *configPath)
+
+	if *configPath == "" && *version == false {
+		exitCode = mainExecutionInline(*periodic, *interval, *treeStore, *path, *commandSuccess, *commandFailure, *logPath, *algorithmName, *processorName, ignore, *contentStoreMaxSize)
+	} else {
+		exitCode = mainExecution(*version, *configPath)
+	}
 	os.Exit(exitCode)
 }
 
@@ -41,6 +62,13 @@ func mainExecution(version bool, configPath string) int {
 	return 0
 }
 
+func mainExecutionInline(periodic bool, interval int, treeStore string, path string, commandSuccess string, commandFailure string, logPath string, algorithmName string, processorName string, ignore arrayFlags, contentStoreMaxSize int) int {
+	configuration := NewConfigInline(periodic, interval, treeStore, path, commandSuccess, commandFailure, logPath, algorithmName, processorName, ignore, contentStoreMaxSize)
+	setLog(configuration)
+	runConfiguration(configuration)
+	return 0
+}
+
 func setLog(configuration Config) {
 	if configuration.Log.LogPath == "stdout" {
 		log.SetOutput(os.Stdout)
@@ -58,9 +86,8 @@ func setLog(configuration Config) {
 func runConfiguration(configuration Config) {
 
 	usageWriter := NewUsageWriter(configuration.Log.MemoryLog, configuration.Log.MemoryLogPath)
-	walker := NewTreeWalk(configuration.Algorithm.Name, configuration.General.Path, configuration.Algorithm.Ignore, *usageWriter)
+	walker := NewTreeWalk(configuration.Algorithm.Name, configuration.General.Path, configuration.Algorithm.Ignore, *usageWriter, configuration.Algorithm.ContentStoreMaxSize)
 	processor := NewProcessor(configuration.Algorithm.Processor, configuration, walker, *usageWriter)
-
 	if configuration.General.Periodic {
 		executeProcessor(processor)
 		ticker := time.NewTicker(time.Duration(configuration.General.Interval) * time.Second)

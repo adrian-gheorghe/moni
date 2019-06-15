@@ -23,9 +23,10 @@ type Config struct {
 		MemoryLogPath string `yaml:"memory_log_path"`
 	} `yaml:"log"`
 	Algorithm struct {
-		Name      string   `yaml:"name"`
-		Processor string   `yaml:"processor"`
-		Ignore    []string `yaml:"ignore"`
+		Name                string   `yaml:"name"`
+		Processor           string   `yaml:"processor"`
+		Ignore              []string `yaml:"ignore"`
+		ContentStoreMaxSize int      `yaml:"content_store_max_size"`
 	} `yaml:"algorithm"`
 }
 
@@ -57,4 +58,50 @@ func (configProcessorYml *ConfigProcessorYml) load() (Config, error) {
 	}
 
 	return configuration, err
+}
+
+// NewConfigInline is the constructor for the Config object
+func NewConfigInline(periodic bool, interval int, treeStore string, path string, commandSuccess string, commandFailure string, logPath string, algorithmName string, processorName string, ignore arrayFlags, contentStoreMaxSize int) Config {
+	configuration := Config{}
+	configurationGeneral := struct {
+		Periodic       bool   `yaml:"periodic"`
+		Interval       int    `yaml:"interval"`
+		TreeStore      string `yaml:"tree_store"`
+		Path           string `yaml:"path"`
+		CommandSuccess string `yaml:"command_success"`
+		CommandFailure string `yaml:"command_failure"`
+	}{
+		periodic,
+		interval,
+		treeStore,
+		path,
+		commandSuccess,
+		commandFailure,
+	}
+	configurationLog := struct {
+		LogPath       string `yaml:"log_path"`
+		MemoryLog     bool   `yaml:"memory_log"`
+		MemoryLogPath string `yaml:"memory_log_path"`
+	}{
+		logPath,
+		false,
+		"./memory.log",
+	}
+
+	configurationAlgorithm := struct {
+		Name                string   `yaml:"name"`
+		Processor           string   `yaml:"processor"`
+		Ignore              []string `yaml:"ignore"`
+		ContentStoreMaxSize int      `yaml:"content_store_max_size"`
+	}{
+		algorithmName,
+		processorName,
+		ignore,
+		contentStoreMaxSize,
+	}
+	configuration.General = configurationGeneral
+	configuration.Log = configurationLog
+	configuration.Algorithm = configurationAlgorithm
+
+	return configuration
 }

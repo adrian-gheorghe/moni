@@ -1,3 +1,13 @@
+github.com/adrian-gheorghe/mediafaker-processors v0.0.0-20190615095749-0648a022a73e h1:dl4IlemM7DzfB7X3xDF3bM8VufOnEXuVCST/HIO7fn8=
+github.com/adrian-gheorghe/mediafaker-processors v0.0.0-20190615095749-0648a022a73e/go.mod h1:XMQ4tZGdN1jFk4YY7rVCljC8yLzPU7E/5qhAfhaezhA=
+github.com/adrian-gheorghe/mediafaker-processors v0.0.0-20190615101520-5763710f712e h1:eRWZ6eAh49efa6kaaU1wKJP8GT/sp3bxJ8cl1pyyJuY=
+github.com/adrian-gheorghe/mediafaker-processors v0.0.0-20190615101520-5763710f712e/go.mod h1:XMQ4tZGdN1jFk4YY7rVCljC8yLzPU7E/5qhAfhaezhA=
+github.com/adrian-gheorghe/mediafaker-processors v0.0.0-20190615110646-74d43bc1cfa6 h1:DbTyEO2r1Toma+osEneZuZc60aIp4ijroKeHMO4Y7wI=
+github.com/adrian-gheorghe/mediafaker-processors v0.0.0-20190615110646-74d43bc1cfa6/go.mod h1:XMQ4tZGdN1jFk4YY7rVCljC8yLzPU7E/5qhAfhaezhA=
+github.com/adrian-gheorghe/mediafaker-processors v0.0.0-20190615113228-842b35782e04 h1:RQBonNHzEpg66K0xvBM3tysv8Oov0U5ENCo/DEGoqx8=
+github.com/adrian-gheorghe/mediafaker-processors v0.0.0-20190615113228-842b35782e04/go.mod h1:XMQ4tZGdN1jFk4YY7rVCljC8yLzPU7E/5qhAfhaezhA=
+github.com/adrian-gheorghe/mediafaker-processors v0.0.0-20190615120717-d2c52246cfd8 h1:WJxqOb9SfxPPAQxjI/ECbbbVDfkxgr1ctAMBBWt4bTM=
+github.com/adrian-gheorghe/mediafaker-processors v0.0.0-20190615120717-d2c52246cfd8/go.mod h1:XMQ4tZGdN1jFk4YY7rVCljC8yLzPU7E/5qhAfhaezhA=
 github.com/google/go-cmp v0.2.0 h1:+dTQ8DZQJz0Mb/HjFlkptS1FeQ4cWSnN941F8aEG4SQ=
 github.com/google/go-cmp v0.2.0/go.mod h1:oXzfMopK8JAjlY9xF4vHSVASa0yLyX7SntLO5aqRK0M=
 github.com/karrick/godirwalk v1.7.8 h1:VfG72pyIxgtC7+3X9CMHI0AOl4LwyRAg98WAgsvffi8=

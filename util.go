@@ -87,3 +87,14 @@ func (usageWriter *UsageWriter) PrintMemUsage() {
 func NewUsageWriter(logEnabled bool, logFile string) *UsageWriter {
 	return &UsageWriter{logEnabled, logFile}
 }
+
+type arrayFlags []string
+
+func (i *arrayFlags) String() string {
+	return "String"
+}
+
+func (i *arrayFlags) Set(value string) error {
+	*i = append(*i, value)
+	return nil
+}
