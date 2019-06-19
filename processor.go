@@ -52,7 +52,9 @@ func (processor *ObjectProcessor) Execute() {
 
 	if !cmp.Equal(currentTree, previousTree) {
 		log.Println("Tree has changed")
-		log.Println(cmp.Diff(currentTree, previousTree))
+		if processor.Configuration.Log.ShowTreeDiff {
+			log.Println(cmp.Diff(currentTree, previousTree))
+		}
 		if processor.Configuration.General.CommandFailure != "" {
 			processor.ExecuteCommand(processor.Configuration.General.CommandFailure)
 		}

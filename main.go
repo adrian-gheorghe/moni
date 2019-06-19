@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-var appVersion = "0.6.1"
+var appVersion = "0.6.2"
 
 func main() {
 	log.SetFlags(0)
@@ -17,6 +17,7 @@ func main() {
 	var configPath = flag.String("config", "", "path for the configuration file")
 	var version = flag.Bool("version", false, "Prints current version")
 	var periodic = flag.Bool("periodic", false, "Should moni keep running and execute periodically ")
+	var showTreeDiff = flag.Bool("show_tree_diff", true, "Show tree diff")
 	var interval = flag.Int("interval", 3600, "If periodic is true, what interval should moni run at? Interval value is in seconds")
 	var treeStore = flag.String("tree_store", "./output.json", "Tree is stored as a json to the following path")
 	var path = flag.String("path", "", "Path to parse")
@@ -32,7 +33,7 @@ func main() {
 	flag.Parse()
 
 	if *configPath == "" && *version == false {
-		exitCode = mainExecutionInline(*periodic, *interval, *treeStore, *path, *commandSuccess, *commandFailure, *logPath, *algorithmName, *processorName, ignore, *contentStoreMaxSize)
+		exitCode = mainExecutionInline(*periodic, *interval, *treeStore, *path, *commandSuccess, *commandFailure, *logPath, *algorithmName, *processorName, ignore, *contentStoreMaxSize, *showTreeDiff)
 	} else {
 		exitCode = mainExecution(*version, *configPath)
 	}
@@ -62,8 +63,8 @@ func mainExecution(version bool, configPath string) int {
 	return 0
 }
 
-func mainExecutionInline(periodic bool, interval int, treeStore string, path string, commandSuccess string, commandFailure string, logPath string, algorithmName string, processorName string, ignore arrayFlags, contentStoreMaxSize int) int {
-	configuration := NewConfigInline(periodic, interval, treeStore, path, commandSuccess, commandFailure, logPath, algorithmName, processorName, ignore, contentStoreMaxSize)
+func mainExecutionInline(periodic bool, interval int, treeStore string, path string, commandSuccess string, commandFailure string, logPath string, algorithmName string, processorName string, ignore arrayFlags, contentStoreMaxSize int, showTreeDiff bool) int {
+	configuration := NewConfigInline(periodic, interval, treeStore, path, commandSuccess, commandFailure, logPath, algorithmName, processorName, ignore, contentStoreMaxSize, showTreeDiff)
 	setLog(configuration)
 	runConfiguration(configuration)
 	return 0
