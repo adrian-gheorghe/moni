@@ -44,7 +44,7 @@ func (walker *MediafakerTreeWalk) recursiveParseTree(returnTree *TreeFile, curre
 
 	sum := ""
 	treeFile := TreeFile{
-		Path:    currentPath,
+		Path:    strings.Replace(currentPath, walker.systemPath, "", 1),
 		Type:    "file",
 		Mode:    info.Mode().String(),
 		Modtime: info.ModTime().String(),
