@@ -21,6 +21,7 @@ type Config struct {
 		LogPath       string `yaml:"log_path"`
 		MemoryLog     bool   `yaml:"memory_log"`
 		MemoryLogPath string `yaml:"memory_log_path"`
+		ShowTreeDiff  bool   `yaml:"show_tree_diff"`
 	} `yaml:"log"`
 	Algorithm struct {
 		Name                string   `yaml:"name"`
@@ -61,7 +62,7 @@ func (configProcessorYml *ConfigProcessorYml) load() (Config, error) {
 }
 
 // NewConfigInline is the constructor for the Config object
-func NewConfigInline(periodic bool, interval int, treeStore string, path string, commandSuccess string, commandFailure string, logPath string, algorithmName string, processorName string, ignore arrayFlags, contentStoreMaxSize int) Config {
+func NewConfigInline(periodic bool, interval int, treeStore string, path string, commandSuccess string, commandFailure string, logPath string, algorithmName string, processorName string, ignore arrayFlags, contentStoreMaxSize int, showTreeDiff bool) Config {
 	configuration := Config{}
 	configurationGeneral := struct {
 		Periodic       bool   `yaml:"periodic"`
@@ -82,10 +83,12 @@ func NewConfigInline(periodic bool, interval int, treeStore string, path string,
 		LogPath       string `yaml:"log_path"`
 		MemoryLog     bool   `yaml:"memory_log"`
 		MemoryLogPath string `yaml:"memory_log_path"`
+		ShowTreeDiff  bool   `yaml:"show_tree_diff"`
 	}{
 		logPath,
 		false,
 		"./memory.log",
+		showTreeDiff,
 	}
 
 	configurationAlgorithm := struct {

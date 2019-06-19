@@ -17,6 +17,7 @@ log:
   # Memory log options are only for development use. Please keep memory_log value to false
   memory_log_path: ./memory.log
   memory_log: false
+  show_tree_diff: false
 algorithm:
   # Algorithm options are:
   # - FlatTreeWalk (manual recursive treewalk)  
