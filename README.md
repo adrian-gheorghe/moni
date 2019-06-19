@@ -4,6 +4,14 @@
 
 moni (short for monitoring) is a utility written in go that scans your file system periodically and alerts you when your file signatures have changed. Can be configured to execute different commands on failure or success.
 
+## Installation
+```bash
+wget -O https://raw.githubusercontent.com/adrian-gheorghe/moni/master/install.sh | bash
+```
+```bash
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/adrian-gheorghe/moni/master/install.sh)"
+```
+
 ## Download
 Download latest from the releases page: https://github.com/adrian-gheorghe/moni/releases
 
