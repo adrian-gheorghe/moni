@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"log"
+	"strings"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -10,6 +11,7 @@ import (
 // Config is the representation of the stored config object
 type Config struct {
 	General struct {
+		Gzip           bool   `yaml:"gzip"`
 		Periodic       bool   `yaml:"periodic"`
 		Interval       int    `yaml:"interval"`
 		TreeStore      string `yaml:"tree_store"`
@@ -62,9 +64,10 @@ func (configProcessorYml *ConfigProcessorYml) load() (Config, error) {
 }
 
 // NewConfigInline is the constructor for the Config object
-func NewConfigInline(periodic bool, interval int, treeStore string, path string, commandSuccess string, commandFailure string, logPath string, algorithmName string, processorName string, ignore arrayFlags, contentStoreMaxSize int, showTreeDiff bool) Config {
+func NewConfigInline(periodic bool, interval int, treeStore string, path string, commandSuccess string, commandFailure string, logPath string, algorithmName string, processorName string, ignore arrayFlags, contentStoreMaxSize int, showTreeDiff bool, gzip bool) Config {
 	configuration := Config{}
 	configurationGeneral := struct {
+		Gzip           bool   `yaml:"gzip"`
 		Periodic       bool   `yaml:"periodic"`
 		Interval       int    `yaml:"interval"`
 		TreeStore      string `yaml:"tree_store"`
@@ -72,6 +75,7 @@ func NewConfigInline(periodic bool, interval int, treeStore string, path string,
 		CommandSuccess string `yaml:"command_success"`
 		CommandFailure string `yaml:"command_failure"`
 	}{
+		gzip,
 		periodic,
 		interval,
 		treeStore,
@@ -105,6 +109,10 @@ func NewConfigInline(periodic bool, interval int, treeStore string, path string,
 	configuration.General = configurationGeneral
 	configuration.Log = configurationLog
 	configuration.Algorithm = configurationAlgorithm
+
+	if gzip && !strings.HasSuffix(configuration.General.TreeStore, ".gz") {
+		configuration.General.TreeStore = configuration.General.TreeStore + ".gz"
+	}
 
 	return configuration
 }

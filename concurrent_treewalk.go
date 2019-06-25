@@ -2,9 +2,10 @@ package main
 
 import (
 	"errors"
-	"log"
 	"os"
 	"path"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // ConcurrentTreeWalk is the object that walks through the file system directory given
@@ -49,7 +50,7 @@ func (walker *ConcurrentTreeWalk) recursiveParseTree(currentPath string) (TreeFi
 
 		files, err := currentDirectory.Readdir(-1)
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err)
 		}
 		for _, fi := range files {
 			if fi.Name() == "." || fi.Name() == ".." {
@@ -58,7 +59,7 @@ func (walker *ConcurrentTreeWalk) recursiveParseTree(currentPath string) (TreeFi
 
 			child, error := walker.recursiveParseTree(path.Join(currentPath, fi.Name()))
 			if error != nil {
-				log.Println(error)
+				log.Error(error)
 			} else {
 				returnTree.Children = append(returnTree.Children, child)
 			}

@@ -2,21 +2,22 @@ package main
 
 import (
 	"flag"
-	"log"
 	"os"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
-var appVersion = "0.6.2"
+var appVersion = "0.6.3"
 
 func main() {
-	log.SetFlags(0)
 	var exitCode = 0
 	var ignore arrayFlags
 
 	var configPath = flag.String("config", "", "path for the configuration file")
 	var version = flag.Bool("version", false, "Prints current version")
 	var periodic = flag.Bool("periodic", false, "Should moni keep running and execute periodically ")
+	var gzip = flag.Bool("gzip", false, "Apply gzip compression")
 	var showTreeDiff = flag.Bool("show_tree_diff", true, "Show tree diff")
 	var interval = flag.Int("interval", 3600, "If periodic is true, what interval should moni run at? Interval value is in seconds")
 	var treeStore = flag.String("tree_store", "./output.json", "Tree is stored as a json to the following path")
@@ -33,7 +34,7 @@ func main() {
 	flag.Parse()
 
 	if *configPath == "" && *version == false {
-		exitCode = mainExecutionInline(*periodic, *interval, *treeStore, *path, *commandSuccess, *commandFailure, *logPath, *algorithmName, *processorName, ignore, *contentStoreMaxSize, *showTreeDiff)
+		exitCode = mainExecutionInline(*periodic, *interval, *treeStore, *path, *commandSuccess, *commandFailure, *logPath, *algorithmName, *processorName, ignore, *contentStoreMaxSize, *showTreeDiff, *gzip)
 	} else {
 		exitCode = mainExecution(*version, *configPath)
 	}
@@ -47,14 +48,14 @@ func mainExecution(version bool, configPath string) int {
 	}
 
 	if configPath == "" {
-		log.Println("Configuration file has not been set up")
+		log.Error("Configuration file has not been set up")
 		return 1
 	}
 
 	configurationProcessor := NewConfigProcessorYml(configPath)
 	configuration, err := configurationProcessor.load()
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return 1
 	}
 
@@ -63,8 +64,8 @@ func mainExecution(version bool, configPath string) int {
 	return 0
 }
 
-func mainExecutionInline(periodic bool, interval int, treeStore string, path string, commandSuccess string, commandFailure string, logPath string, algorithmName string, processorName string, ignore arrayFlags, contentStoreMaxSize int, showTreeDiff bool) int {
-	configuration := NewConfigInline(periodic, interval, treeStore, path, commandSuccess, commandFailure, logPath, algorithmName, processorName, ignore, contentStoreMaxSize, showTreeDiff)
+func mainExecutionInline(periodic bool, interval int, treeStore string, path string, commandSuccess string, commandFailure string, logPath string, algorithmName string, processorName string, ignore arrayFlags, contentStoreMaxSize int, showTreeDiff bool, gzip bool) int {
+	configuration := NewConfigInline(periodic, interval, treeStore, path, commandSuccess, commandFailure, logPath, algorithmName, processorName, ignore, contentStoreMaxSize, showTreeDiff, gzip)
 	setLog(configuration)
 	runConfiguration(configuration)
 	return 0

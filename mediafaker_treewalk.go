@@ -71,7 +71,12 @@ func (walker *MediafakerTreeWalk) recursiveParseTree(returnTree *TreeFile, curre
 			if err != nil {
 				return err
 			}
-			treeFile.ImageInfo = imageInfo
+			treeFile.ImageInfo = MoniImageInfo{}
+			treeFile.ImageInfo.Width = imageInfo.Width
+			treeFile.ImageInfo.Height = imageInfo.Height
+			treeFile.ImageInfo.BlockWidth = imageInfo.BlockWidth
+			treeFile.ImageInfo.BlockHeight = imageInfo.BlockHeight
+			treeFile.ImageInfo.PixelInfo = strings.Join(imageInfo.PixelInfo, "_")
 		}
 
 		treeFile.MediaType = walker.GetMediaType(data)

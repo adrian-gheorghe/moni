@@ -1,13 +1,14 @@
 package main
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"io/ioutil"
-	"log"
+	"os"
 	"os/exec"
 
-	imageProcessors "github.com/adrian-gheorghe/mediafaker-processors"
 	"github.com/google/go-cmp/cmp"
+	log "github.com/sirupsen/logrus"
 )
 
 // Processor is the abstraction of the main execution of the program
@@ -34,16 +35,15 @@ type ObjectProcessor struct {
 // Execute is the implementation of the actual processing method.
 func (processor *ObjectProcessor) Execute() {
 	processor.Writer.PrintMemUsage()
-	log.SetFlags(log.Lshortfile)
 
 	currentTree, err := processor.ProcessTree()
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 	// get previous object tree
 	previousTree, err := processor.GetPreviousObjectTree(processor.Configuration.General.TreeStore)
 	if err != nil {
-		log.Println(err)
+		log.Warn(err)
 	}
 
 	currentTreeString, _ := processor.ProcessTreeObject(currentTree)
@@ -51,15 +51,15 @@ func (processor *ObjectProcessor) Execute() {
 	processor.WriteOutput(currentTreeString)
 
 	if !cmp.Equal(currentTree, previousTree) {
-		log.Println("Tree has changed")
+		log.Info("Tree has changed")
 		if processor.Configuration.Log.ShowTreeDiff {
-			log.Println(cmp.Diff(currentTree, previousTree))
+			log.Info(cmp.Diff(currentTree, previousTree))
 		}
 		if processor.Configuration.General.CommandFailure != "" {
 			processor.ExecuteCommand(processor.Configuration.General.CommandFailure)
 		}
 	} else {
-		log.Println("Tree is identical")
+		log.Info("Tree is identical")
 		if processor.Configuration.General.CommandSuccess != "" {
 			processor.ExecuteCommand(processor.Configuration.General.CommandSuccess)
 		}
@@ -72,59 +72,108 @@ func (processor *ObjectProcessor) ProcessTree() (TreeFile, error) {
 	tree, err := processor.Walker.ParseTree()
 
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 	return tree, err
 }
 
 // ProcessTreeObject is the implementation of the tree process method
 func (processor *ObjectProcessor) ProcessTreeObject(tree TreeFile) ([]byte, error) {
-	treeProcessed, err := json.MarshalIndent(tree, "", "\t")
-	return treeProcessed, err
+	if processor.Configuration.General.Gzip {
+		return json.Marshal(tree)
+	} else {
+		return json.MarshalIndent(tree, "", "\t")
+	}
 }
 
 // GetPreviousObjectTree is the implementation of the tree compare method
 func (processor *ObjectProcessor) GetPreviousObjectTree(objectPath string) (TreeFile, error) {
-	content, err := ioutil.ReadFile(objectPath)
-	if err != nil {
-		return TreeFile{}, err
-	}
 	tree := TreeFile{}
-	err = json.Unmarshal(content, &tree)
-	if err != nil {
-		log.Println(err)
+	if processor.Configuration.General.Gzip {
+		fi, err := os.Open(objectPath)
+		if err != nil {
+			return TreeFile{}, err
+		}
+		defer fi.Close()
+
+		fz, err := gzip.NewReader(fi)
+		if err != nil {
+			return TreeFile{}, err
+		}
+		defer fz.Close()
+		content, err := ioutil.ReadAll(fz)
+		if err != nil {
+			return TreeFile{}, err
+		}
+
+		err = json.Unmarshal(content, &tree)
+		if err != nil {
+			log.Warn(err)
+		}
+	} else {
+		content, err := ioutil.ReadFile(objectPath)
+		if err != nil {
+			return TreeFile{}, err
+		}
+		err = json.Unmarshal(content, &tree)
+		if err != nil {
+			log.Warn(err)
+		}
 	}
-	return tree, err
+
+	return tree, nil
 }
 
 // WriteOutput is the output log for the ProcessorExecuter
-func (processor *ObjectProcessor) WriteOutput(treeYAML []byte) error {
+func (processor *ObjectProcessor) WriteOutput(treeJson []byte) error {
 	processor.Writer.PrintMemUsage()
-	return ioutil.WriteFile(processor.Configuration.General.TreeStore, treeYAML, 0644)
+	if processor.Configuration.General.Gzip {
+		f, _ := os.Create(processor.Configuration.General.TreeStore)
+		w := gzip.NewWriter(f)
+		_, err := w.Write(treeJson)
+		w.Close()
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+	return ioutil.WriteFile(processor.Configuration.General.TreeStore, treeJson, 0644)
+
 }
 
 // ExecuteCommand is run when a tree is parsed and is different or equal to the previous tree
 func (processor *ObjectProcessor) ExecuteCommand(command string) {
 	out, err := exec.Command("sh", "-c", command).Output()
 	if err != nil {
-		log.Panicln(err)
+		log.Error(err)
 	} else {
-		log.Println(string(out))
+		log.Info(string(out))
 	}
 }
 
 // TreeFile is a representation of a file or folder in the filesystem
 type TreeFile struct {
-	Path      string                    `json:"Path"`
-	Type      string                    `json:"Type"`
-	Mode      string                    `json:"Mode"`
-	Size      int64                     `json:"Size"`
-	Modtime   string                    `json:"Modtime"`
-	Sum       string                    `json:"Sum"`
-	MediaType string                    `json:MediaType`
-	Content   string                    `json:"Content"`
-	ImageInfo imageProcessors.ImageInfo `json:"ImageInfo"`
-	Children  []TreeFile                `json:"Children"`
+	Path      string        `json:"Path"`
+	Type      string        `json:"Type"`
+	Mode      string        `json:"Mode"`
+	Size      int64         `json:"Size"`
+	Modtime   string        `json:"Modtime"`
+	Sum       string        `json:"Sum"`
+	MediaType string        `json:MediaType`
+	Content   string        `json:"Content"`
+	ImageInfo MoniImageInfo `json:"ImageInfo"`
+	Children  []TreeFile    `json:"Children"`
+}
+
+// MoniImageInfo reflects information to recreate the file. This amounts to width height and pixel info
+type MoniImageInfo struct {
+	Width       int    `json:"W"`
+	Height      int    `json:"H"`
+	PixelInfo   string `json:"P"`
+	BlockWidth  int    `json:"BW"`
+	BlockHeight int    `json:"BH"`
 }
 
 // TreeWalkType is the abstraction of the walk object

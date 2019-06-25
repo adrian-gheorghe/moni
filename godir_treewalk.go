@@ -4,10 +4,10 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"io/ioutil"
-	"log"
 	"os"
 
 	"github.com/karrick/godirwalk"
+	log "github.com/sirupsen/logrus"
 )
 
 // GoDirTreeWalk is the object that walks through the file system directory given but stores data in a non hierarchic way
@@ -79,6 +79,6 @@ func (walker *GoDirTreeWalk) runParseTree() (TreeFile, error) {
 		panic(errWalk)
 	}
 
-	log.Println("File count: ", counter)
+	log.Info("File count: ", counter)
 	return returnTree, nil
 }

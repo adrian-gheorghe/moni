@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"log"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -17,11 +18,10 @@ func TestVersion(t *testing.T) {
 	var buf bytes.Buffer
 	log.SetOutput(&buf)
 	mainExecution(testVersion, testConfigPath)
-	log.SetOutput(os.Stderr)
+	log.SetOutput(os.Stdout)
 	out := buf.String()
-
-	if out != appVersion+"\n" {
-		t.Fatal("Failure")
+	if strings.Contains(out, appVersion) == false {
+		t.Fatal("Failure", out, appVersion)
 	}
 }
 
@@ -37,7 +37,7 @@ func TestConfiguration(t *testing.T) {
 	mainExecution(testVersion, testConfigPath)
 	log.SetOutput(os.Stderr)
 	out := buf.String()
-	if out != "Configuration file has not been set up\n" {
+	if !strings.Contains(out, "Configuration file has not been set up") {
 		t.Fatal("Failure" + out)
 	}
 }
