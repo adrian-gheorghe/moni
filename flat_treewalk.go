@@ -3,11 +3,11 @@ package main
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // FlatTreeWalk is the object that walks through the file system directory given but stores data in a non hierarchic way
@@ -22,7 +22,7 @@ func (walker *FlatTreeWalk) ParseTree() (TreeFile, error) {
 	returnTree := TreeFile{}
 	counter := 0
 	walker.recursiveParseTree(&returnTree, walker.systemPath, &counter)
-	log.Println("File count: ", counter)
+	log.Info("File count: ", counter)
 	return returnTree, nil
 }
 
@@ -68,7 +68,7 @@ func (walker *FlatTreeWalk) recursiveParseTree(returnTree *TreeFile, currentPath
 		//Add symlink support
 		files, err := currentDirectory.Readdir(-1)
 		if err != nil {
-			log.Println(err)
+			log.Error(err)
 			return nil
 		}
 		for _, fi := range files {
@@ -77,7 +77,7 @@ func (walker *FlatTreeWalk) recursiveParseTree(returnTree *TreeFile, currentPath
 			}
 			error := walker.recursiveParseTree(returnTree, path.Join(currentPath, fi.Name()), counter)
 			if error != nil {
-				fmt.Println(error)
+				log.Error(error)
 			}
 		}
 	}
