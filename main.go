@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var appVersion = "0.6.3"
+var appVersion = "0.6.4"
 
 func main() {
 	var exitCode = 0
